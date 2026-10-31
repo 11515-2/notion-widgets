@@ -24,18 +24,21 @@
     background: var(--surface-2);
   }
 
-  /* 底部四项数据：2×2 网格，标签左对齐、数字右对齐，两列等宽才对得齐 */
+  /* 底部四项数据：2×2 网格
+     列宽用 auto（=该列最宽那格的宽度），所以对齐还在，但标签和数字不会被拉开；
+     整体 justify-content:center 居中，不再靠固定宽度撑开 */
   .grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: clamp(4px, 1vh, 8px) clamp(18px, 4vw, 36px);
-    width: min(100%, clamp(220px, 46vw, 330px));
+    grid-template-columns: auto auto;
+    gap: clamp(4px, 1vh, 8px) clamp(16px, 3vw, 28px);
+    justify-content: center;
     margin-top: clamp(2px, .6vh, 6px);
   }
   .grid span {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
+    gap: clamp(7px, 1.5vw, 13px);   /* 标签与数字之间的最小间隙 */
     font-size: clamp(10px, 2vh, 13px);
     color: var(--ink-2);
     letter-spacing: .02em;
