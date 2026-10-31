@@ -128,6 +128,7 @@
     font-weight: var(--w-strong);
     color: var(--ink);
     min-width: 0;
+    max-width: 80%;      /* 不横跨到右轴，给落款留出右边那条线 */
     text-wrap: pretty;
   }
   #by { color: var(--ink-2); }
@@ -144,13 +145,14 @@
   <div class="card">
     <div class="stage">
 
-      <!-- ① 时间 -->
+      <!-- ① 时间：时间走左轴，日期走右轴 —— 这样右轴从第一行就立住了 -->
       <div class="seg">
         <div class="row">
           <div class="num"><span id="time">--:--</span><span id="sec">:--</span></div>
-        </div>
-        <div class="row">
-          <span id="date" class="sub sub--main">—</span>
+          <div class="right">
+            <span id="date" class="sub sub--main">—</span>
+            <span id="lunar" class="sub">—</span>
+          </div>
         </div>
       </div>
 
@@ -196,9 +198,10 @@
 /* ═══ ① 时钟 ═══════════════════════════════════════════════ */
 (function () {
   var WEEK = ['周日','周一','周二','周三','周四','周五','周六'];
-  var elTime = document.getElementById('time');
-  var elSec  = document.getElementById('sec');
-  var elDate = document.getElementById('date');
+  var elTime  = document.getElementById('time');
+  var elSec   = document.getElementById('sec');
+  var elDate  = document.getElementById('date');
+  var elLunar = document.getElementById('lunar');
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
   var lunarKey = '';
 
@@ -207,13 +210,15 @@
     elTime.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes());
     elSec.textContent  = ':' + pad(d.getSeconds());
 
+    // 公历一行、农历一行，分给右轴的两行
     var key = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
     if (key !== lunarKey) {
       lunarKey = key;
       var lunar = '';
       try { lunar = (typeof lunarText === 'function') ? lunarText(d) : ''; } catch (e) {}
-      elDate.textContent = d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate())
-                         + ' ' + WEEK[d.getDay()] + (lunar ? '　' + lunar : '');
+      elDate.textContent  = d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate())
+                          + ' ' + WEEK[d.getDay()];
+      elLunar.textContent = lunar || ' ';
     }
   }
   tick();
