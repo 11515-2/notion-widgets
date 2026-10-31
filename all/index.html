@@ -14,16 +14,26 @@
   })();
 </script>
 <style>
-  /* ═══ 窄高版 · 三阶明暗 ════════════════════════════════════════════
-     上一版一屏里堆了 5 个小胶囊（日期、天气状况、高考、目标日、剩余时间）。
-     胶囊是拿来做强调的，处处都是就没有重点，整屏像贴满标签的箱子。
+  /* ═══ 双轴版 · 左右两条边都对齐 ══════════════════════════════════════
+     上一版只是左对齐，右边是自由的 —— 长行短行各跑各的，还是有点散。
 
-     这一版把胶囊全撤了，只用三样东西分层：
-       大小   时间 / 温度 / 天数 —— 三个主数字压住视线
-       明暗   主信息 --ink，辅助 --ink-2，最次要 --ink-3
-       疏密   段间一道居中的短细线，不是通栏横杠（通栏像表格）
+     这一版每条都做成一个 row：左边放主信息、右边放附注，两端分别贴住
+     stage 的左右边界。于是整屏只有两条竖轴：
+        左轴 x=0      右轴 x=100%
+     主次靠字号和明暗分，秩序靠这两条轴锁住。
 
-     三段视觉重量约 45 : 30 : 25，不再头重脚轻。 */
+       16:35 :54
+       2026.10.31 周六 九月廿二
+       ─────────────────────────────
+       218 天            高考 · 2027.06.07
+                         余 7 时 24 分 05 秒
+       ─────────────────────────────
+       6°C  阴 · 大同    最高 9°  最低 0°
+                         体感 1°  湿度 39%
+       ─────────────────────────────
+       一个人知道自己为什么而活，
+       就可以忍受任何一种生活。
+                                    尼采 2026.10.31 */
 
   .card { padding: clamp(12px, 2.4vh, 22px) clamp(14px, 3.4vw, 28px); }
 
@@ -35,159 +45,98 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: flex-start;      /* 一条左轴贯穿到底，边缘不再呈锯齿 */
-    gap: clamp(16px, 4vh, 34px);  /* 段间距拉大，三组才分得开 */
+    gap: clamp(8px, 2vh, 22px);
     text-align: left;
   }
 
   .seg {
-    position: relative;
     width: 100%;
     min-width: 0;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: clamp(3px, .75vh, 7px);   /* 段内收紧，跟段间的 16~34px 拉开层次 */
-    padding: clamp(4px, 1.1vh, 11px) 0;
+    gap: clamp(2px, .55vh, 5px);
+    padding: clamp(5px, 1.25vh, 12px) 0;
   }
+  /* 段间一道通栏细线 —— 现在左右都有轴，通栏线反而是最整齐的边界 */
+  .seg + .seg { border-top: 1px solid var(--line); }
 
-  /* 分隔线：贴左的一小段，跟左轴同起点。通栏横杠会把窄列切成表格 */
-  .seg + .seg::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: clamp(18px, 6%, 30px);
-    height: 1px;
-    background: var(--line-strong);
-  }
-
-  /* ─── ① 时间 ─────────────────────────────────────────── */
-  .time-row {
+  /* 一条 row：左组贴左轴，右组贴右轴 */
+  .row {
     display: flex;
     align-items: baseline;
-    justify-content: center;
-    gap: clamp(2px, .8vw, 6px);
-    line-height: .92;
-    color: var(--ink);
-    font-weight: var(--w-strong);
-    letter-spacing: -.03em;
+    justify-content: space-between;
+    gap: clamp(8px, 2.4vw, 18px);
+    width: 100%;
+    min-width: 0;
   }
-  #time { font-size: clamp(26px, min(11.5vh, 12.5vw), 110px); }
-  #sec  { font-size: clamp(13px, min(5.75vh, 6.25vw), 55px); color: var(--ink-3); }
+  .row--end { justify-content: flex-end; }
 
-  #date {
-    font-size: clamp(10px, min(2.35vh, 3vw), 14px);
-    color: var(--ink-2);
-    letter-spacing: .02em;
-  }
-
-  /* ─── ① 天气：状况小字贴在温度左边，四项小字沉到最下 ──────── */
-  .weather-line {
+  /* 右组：竖着叠、整体右对齐 */
+  .right {
     display: flex;
-    align-items: baseline;
-    justify-content: center;
-    gap: clamp(6px, 1.8vw, 13px);
-    flex-wrap: wrap;
-  }
-  #desc {
-    font-size: clamp(10px, min(2.5vh, 3.1vw), 15px);
-    color: var(--ink-2);
-    letter-spacing: .02em;
-  }
-  .temp-row {
-    display: flex;
-    align-items: baseline;
-    line-height: .92;
-    color: var(--ink);
-    font-weight: var(--w-strong);
-    letter-spacing: -.03em;
-  }
-  #temp { font-size: clamp(18px, min(8vh, 9.2vw), 82px); }
-  .deg  {
-    font-size: clamp(8px, min(2.8vh, 3.2vw), 30px);
-    color: var(--ink-3);
-    margin-left: .08em;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: clamp(1px, .35vh, 3px);
+    text-align: right;
+    min-width: 0;
   }
 
-  /* 四项横排：不占块、不加竖线，只靠字距分开 */
-  .mini {
-    display: flex;
-    align-items: baseline;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: clamp(6px, 2vw, 15px);
+  /* 全屏唯一的小字级：除了三个主数字，其余都挂 .sub */
+  .sub {
     font-size: clamp(9px, min(2.3vh, 2.9vw), 13px);
     color: var(--ink-3);
     letter-spacing: .02em;
     white-space: nowrap;
   }
-  .mini span { display: flex; align-items: baseline; gap: .28em; }
-  .mini b { color: var(--ink-2); font-weight: var(--w-body); }
+  .sub b { color: var(--ink-2); font-weight: var(--w-body); }
+  .sub--main { color: var(--ink-2); }
 
-  /* ─── ② 倒计时 ──────────────────────────────────────── */
-  .count-caption {
+  /* ─── 主数字：时间 / 天数 / 温度，同一套字型规则 ─────────── */
+  .num {
     display: flex;
     align-items: baseline;
-    justify-content: center;
-    gap: clamp(4px, 1.2vw, 9px);
-    font-size: clamp(10px, min(2.35vh, 3vw), 14px);
-    color: var(--ink-3);
-    letter-spacing: .02em;
-    flex-wrap: wrap;
-  }
-  #label { color: var(--ink-2); }
-  .count-caption i { font-style: normal; opacity: .55; }
-
-  .days-row {
-    display: flex;
-    align-items: baseline;
-    justify-content: center;
-    gap: clamp(3px, .9vw, 8px);
+    gap: clamp(2px, .7vw, 6px);
     line-height: .92;
     color: var(--ink);
     font-weight: var(--w-strong);
     letter-spacing: -.03em;
   }
-  #days { font-size: clamp(22px, min(9vh, 10.5vw), 88px); }
-  .unit {
-    font-size: clamp(10px, min(3.6vh, 4vw), 26px);
+  #time { font-size: clamp(24px, min(10.5vh, 11.5vw), 100px); }
+  #sec  { font-size: clamp(12px, min(5.25vh, 5.75vw), 50px); color: var(--ink-3); }
+  #days { font-size: clamp(20px, min(8.4vh, 9.6vw), 80px); }
+  #temp { font-size: clamp(16px, min(7.2vh, 8.4vw), 72px); }
+
+  .unit, .deg {
+    font-size: clamp(9px, min(3vh, 3.4vw), 24px);
     color: var(--ink-3);
-    letter-spacing: .08em;
+    letter-spacing: .06em;
   }
 
-  #detail {
-    font-size: clamp(9px, min(2.3vh, 2.9vw), 13px);
-    color: var(--ink-3);
-    letter-spacing: .02em;
+  /* 天气左组：温度在前，状况跟在后面同一基线 */
+  .wx-left {
+    display: flex;
+    align-items: baseline;
+    gap: clamp(6px, 1.8vw, 13px);
+    min-width: 0;
   }
 
-  /* ─── ③ 引文 ────────────────────────────────────────── */
+  /* ─── 引文 ──────────────────────────────────────────── */
   #text {
     margin: 0;
-    font-size: clamp(11px, min(3.5vh, 4.4vw), 25px);
-    line-height: 1.6;
+    font-size: clamp(11px, min(3.3vh, 4.1vw), 24px);
+    line-height: 1.55;
     font-weight: var(--w-strong);
     color: var(--ink);
     min-width: 0;
-    text-wrap: balance;
+    text-wrap: pretty;
   }
-  .by-row {
-    display: flex;
-    align-items: baseline;
-    justify-content: center;
-    gap: clamp(5px, 1.2vw, 10px);
-    font-size: clamp(9px, min(2.3vh, 2.9vw), 13px);
-    color: var(--ink-3);
-    white-space: nowrap;
-  }
-  .by-row b { color: var(--ink-2); font-weight: var(--w-body); }
+  #by { color: var(--ink-2); }
 
-  /* 极窄时只压字号，布局不动（本来就是单列） */
+  /* 极窄时只压字号，结构不动 */
   @media (max-width: 300px) {
-    #time { font-size: clamp(22px, 12vw, 70px); }
-    #temp { font-size: clamp(16px, 9vw, 56px); }
-    #days { font-size: clamp(20px, 10vw, 60px); }
+    #time { font-size: clamp(20px, 11vw, 64px); }
+    #temp { font-size: clamp(15px, 8vw, 52px); }
+    #days { font-size: clamp(18px, 9vw, 56px); }
   }
 </style>
 </head>
@@ -195,41 +144,47 @@
   <div class="card">
     <div class="stage">
 
-      <!-- ① 时间 · 日期 · 天气 -->
+      <!-- ① 时间 -->
       <div class="seg">
-        <div class="time-row">
-          <span id="time">--:--</span><span id="sec">:--</span>
+        <div class="row">
+          <div class="num"><span id="time">--:--</span><span id="sec">:--</span></div>
         </div>
-        <div id="date">—</div>
-
-        <div class="weather-line">
-          <span id="desc">正在读取…</span>
-          <div class="temp-row"><span id="temp">—</span><span class="deg">°C</span></div>
-        </div>
-
-        <div class="mini">
-          <span>最高<b id="hi">—</b></span>
-          <span>最低<b id="lo">—</b></span>
-          <span>体感<b id="feel">—</b></span>
-          <span>湿度<b id="hum">—</b></span>
+        <div class="row">
+          <span id="date" class="sub sub--main">—</span>
         </div>
       </div>
 
       <!-- ② 倒计时 -->
       <div class="seg">
-        <div class="count-caption">
-          <span id="label">—</span><i>·</i><span id="target">—</span>
+        <div class="row">
+          <div class="num"><span id="days">—</span><span class="unit">天</span></div>
+          <div class="right">
+            <span class="sub sub--main"><span id="label">—</span> · <span id="target">—</span></span>
+            <span id="detail" class="sub">—</span>
+          </div>
         </div>
-        <div class="days-row"><span id="days">—</span><span class="unit">天</span></div>
-        <div id="detail">—</div>
       </div>
 
-      <!-- ③ 今日一句 -->
+      <!-- ③ 天气 -->
+      <div class="seg">
+        <div class="row">
+          <div class="wx-left">
+            <span class="num"><span id="temp">—</span><span class="deg">°C</span></span>
+            <span id="desc" class="sub sub--main">正在读取…</span>
+          </div>
+          <div class="right">
+            <span class="sub">最高<b id="hi">—</b>　最低<b id="lo">—</b></span>
+            <span class="sub">体感<b id="feel">—</b>　湿度<b id="hum">—</b></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ④ 今日一句 -->
       <div class="seg">
         <p id="text">—</p>
-        <div class="by-row">
-          <b id="by">—</b>
-          <span id="qdate">—</span>
+        <div class="row row--end">
+          <span id="by" class="sub">—</span>
+          <span id="qdate" class="sub">—</span>
         </div>
       </div>
 
