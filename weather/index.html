@@ -24,15 +24,18 @@
     background: var(--surface-2);
   }
 
-  /* 底部四项数据：2×2 网格、纯文字、数字加粗，别再堆一堆色块 */
+  /* 底部四项数据：2×2 网格，标签左对齐、数字右对齐，两列等宽才对得齐 */
   .grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: clamp(3px, .9vh, 7px) clamp(16px, 3.4vw, 30px);
-    justify-items: center;
+    gap: clamp(4px, 1vh, 8px) clamp(18px, 4vw, 36px);
+    width: min(100%, clamp(220px, 46vw, 330px));
     margin-top: clamp(2px, .6vh, 6px);
   }
   .grid span {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
     font-size: clamp(10px, 2vh, 13px);
     color: var(--ink-2);
     letter-spacing: .02em;
@@ -41,7 +44,6 @@
   .grid b {
     color: var(--ink);
     font-weight: 700;
-    margin-left: .2em;
   }
 </style>
 </head>
