@@ -1,0 +1,47 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0">
+<iframe id="f" src="./all/?theme=dark" style="width:400px;height:560px;border:0"></iframe>
+<pre id="out">pending</pre>
+<script>
+window.addEventListener('load', function () {
+  setTimeout(function () {
+    var d = document.getElementById('f').contentDocument;
+    var L = [];
+    var st = d.querySelector('.stage').getBoundingClientRect();
+    L.push('stage ' + Math.round(st.width) + 'x' + Math.round(st.height)
+         + '  左' + Math.round(st.left) + ' 右' + Math.round(st.right));
+    L.push('');
+    L.push('区块位置（看是否咬合）:');
+    var areas = [['时间','.c-time'],['天气','.c-wx'],['日期','.c-date'],['天数','.c-days'],['附注','.c-target'],['引文','.c-quote']];
+    areas.forEach(function (a) {
+      var e = d.querySelector(a[1]); if (!e) { L.push('  ' + a[0] + ' 缺失'); return; }
+      var r = e.getBoundingClientRect();
+      L.push('  ' + a[0].padEnd(4,' ') + ' x=' + Math.round(r.left) + '..' + Math.round(r.right)
+           + '  y=' + Math.round(r.top) + '..' + Math.round(r.bottom)
+           + '  ' + Math.round(r.width) + 'x' + Math.round(r.height));
+    });
+    // 天气块是否真的跨了两行（高度 > 时间块高度）
+    var t = d.querySelector('.c-time').getBoundingClientRect();
+    var w = d.querySelector('.c-wx').getBoundingClientRect();
+    L.push('');
+    L.push('天气块高 ' + Math.round(w.height) + ' vs 时间块高 ' + Math.round(t.height)
+         + ' → 跨行' + (w.height > t.height + 5 ? '成立 ✓' : '不成立 ✗'));
+    L.push('');
+    var ov = 0;
+    ['c-time','c-wx','c-date','c-days','c-target','c-quote'].forEach(function (c) {
+      var e = d.querySelector('.' + c);
+      if (e.scrollWidth > e.clientWidth + 1 || e.scrollHeight > e.clientHeight + 1) { ov++; L.push(c + ' 溢出!'); }
+    });
+    L.push('溢出区块数: ' + ov);
+    var card = d.querySelector('.card').getBoundingClientRect();
+    var q = d.querySelector('.c-quote').getBoundingClientRect();
+    var f1 = d.querySelector('.c-time').getBoundingClientRect();
+    L.push('上留白 ' + Math.round(f1.top - card.top) + ' 下留白 ' + Math.round(card.bottom - q.bottom));
+    var sz = function (s) { var e = d.querySelector(s); return e ? parseFloat(getComputedStyle(e).fontSize).toFixed(1) : 'NA'; };
+    L.push('字号 时间=' + sz('#time') + ' 天数=' + sz('#days') + ' 温度=' + sz('#temp')
+         + ' 引文=' + sz('#text') + ' 小字=' + sz('.sub'));
+    L.push('文本: ' + ['time','sec','date','lunar','desc','temp','hi','lo','feel','hum','label','target','days','detail','text','by','qdate']
+      .map(function(id){var e=d.querySelector('#'+id);return id+'='+(e?e.textContent:'缺!');}).join(' | '));
+    document.getElementById('out').textContent = L.join('\n');
+  }, 3200);
+});
+</script></body></html>
