@@ -14,23 +14,26 @@
   })();
 </script>
 <style>
-  /* ═══ 交叉版 · 两列咬合 ══════════════════════════════════════════════
-     之前四条横带一路兜到底，读起来像报表。这版改成两列交错咬合：
+  /* ═══ 交叉版 · 两列错行 ══════════════════════════════════════════════
+     两侧各自成列、各自往下堆，两列的顶对齐、底错开：
 
-        ┌─────────────────┬──────────────┐
-        │ 16:43           │ 阴 · 大同     │
-        │ :26             │ 6°C          │
-        │ 2026.10.31      │ 最高9° 最低0° │
-        │ 周六 九月廿二     │ 体感1° 湿度39% │
-        │ 218 天          │ 高考 2027.06.07│
-        │                 │ 余7时16分33秒  │
-        └─────────────────┴──────────────┘
-         「一个人知道自己为什么而活，
-           就可以忍受任何一种生活。」   —— 尼采
+        23:16 :16        1°C
+        2026.10.31 周六   晴 · 大同
+        九月廿二          最高9°  最低0°
+                         体感-4°  湿度60%
+        218 天            高考 · 2027.06.07
+                         余 0 时 43 分 43 秒
+        ──────────────────────────────────
+        「一个人知道自己为什么而活，
+          就可以忍受任何一种生活。」
+                                 尼采 2026.10.31
 
-     网格区就是这四块：time / wx / date / target，外加引文跨满两列。
-     天气块跨了第 1、2 两行 —— 它一侧咬着大字时间、另一侧咬着小字日期，
-     这就是"交叉"的地方：块与块之间靠高度互锁，不靠通栏横线隔开。 */
+     上一版用 space-between 把右边元素硬撑到两行里，结果元素被拉散、
+     跟左边的基线全对不上，看着像错位。这版改成：
+       · 两列都用 align-items: baseline 顶对齐 —— 时间和温度两个大数字
+         落在同一条基线上，这才像"设计"而不是"歪了"
+       · 列内间距统一，不再把人拉开
+       · 左列 4 行、右列 6 行 —— 两列底部自然错开，交错感来自这里 */
 
   .card { padding: clamp(12px, 2.4vh, 22px) clamp(14px, 3.4vw, 28px); }
 
@@ -39,54 +42,34 @@
     width: 100%;
     max-width: min(100%, 400px);
     margin: 0 auto;
-    display: grid;
-    grid-template-columns: max-content minmax(0, 1fr);
-    grid-template-areas:
-      "time  wx"
-      "date  wx"
-      "days  target"
-      "quote quote";
-    align-content: center;
-    column-gap: clamp(10px, 3vw, 20px);
-    row-gap: clamp(5px, 1.5vh, 14px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: clamp(10px, 2.6vh, 24px);
     text-align: left;
   }
 
-  .c-time   { grid-area: time; }
-  .c-date   { grid-area: date; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-  .c-days   { grid-area: days; }
+  /* 顶对齐靠 baseline：两列第一个元素（两个大数字）落在同一条线上 */
+  .pair {
+    display: flex;
+    align-items: baseline;
+    gap: clamp(12px, 3.4vw, 24px);
+    width: 100%;
+  }
 
-  /* 天气块跨两行：状况贴顶、四项贴底，把两行高度全咬住 */
-  .c-wx {
-    grid-area: wx;
+  .col {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
-    justify-content: space-between;
     gap: clamp(3px, .9vh, 8px);
-    text-align: right;
     min-width: 0;
   }
-  /* 倒计时附注贴底，跟左边"天"字落在同一条基线上 */
-  .c-target {
-    grid-area: target;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    justify-content: flex-end;
-    gap: clamp(1px, .4vh, 3px);
-    text-align: right;
-    min-width: 0;
-  }
+  .col--l { flex: 0 0 auto; }
+  .col--r { flex: 1 1 auto; }
 
-  .c-quote {
-    grid-area: quote;
-    border-top: 1px solid var(--line);
-    margin-top: clamp(2px, .8vh, 8px);
-    padding-top: clamp(8px, 2vh, 18px);
-  }
+  /* 列里的大数字之后留一点呼吸，别让小字贴太紧 */
+  .col .num { margin-bottom: clamp(1px, .3vh, 3px); }
 
-  /* ─── 字级：主数字一套，其余全挂 .sub ──────────────────── */
+  /* ─── 字级 ─────────────────────────────────────────── */
   .num {
     display: flex;
     align-items: baseline;
@@ -96,13 +79,13 @@
     font-weight: var(--w-strong);
     letter-spacing: -.03em;
   }
-  #time { font-size: clamp(24px, min(9.3vh, 10.8vw), 92px); }
-  #sec  { font-size: clamp(12px, min(4.65vh, 5.4vw), 46px); color: var(--ink-3); }
-  #days { font-size: clamp(20px, min(7.4vh, 8.6vw), 72px); }
-  #temp { font-size: clamp(15px, min(6.4vh, 7.2vw), 62px); }
+  #time { font-size: clamp(26px, min(9.3vh, 13vw), 100px); }
+  #sec  { font-size: clamp(13px, min(4.65vh, 6.5vw), 50px); color: var(--ink-3); }
+  #temp { font-size: clamp(16px, min(6.2vh, 8.6vw), 66px); }
+  #days { font-size: clamp(20px, min(7vh, 9.8vw), 76px); }
 
   .unit, .deg {
-    font-size: clamp(9px, min(2.9vh, 3.2vw), 24px);
+    font-size: clamp(9px, min(2.8vh, 3.6vw), 24px);
     color: var(--ink-3);
     letter-spacing: .06em;
   }
@@ -116,10 +99,14 @@
   .sub b { color: var(--ink-2); font-weight: var(--w-body); }
   .sub--main { color: var(--ink-2); }
 
-  /* ─── 引文 ─────────────────────────────────────────── */
+  /* ─── 引文：跨满两列，收在底部 ───────────────────────── */
+  .quote {
+    border-top: 1px solid var(--line);
+    padding-top: clamp(8px, 2vh, 18px);
+  }
   #text {
     margin: 0;
-    font-size: clamp(11px, min(3.4vh, 4.2vw), 24px);
+    font-size: clamp(11px, min(3.3vh, 4.1vw), 24px);
     line-height: 1.55;
     font-weight: var(--w-strong);
     color: var(--ink);
@@ -134,11 +121,11 @@
   }
   #by { color: var(--ink-2); }
 
-  /* 极窄时只压字号，网格不动 */
+  /* 极窄时只压字号，两列不动 */
   @media (max-width: 300px) {
-    #time { font-size: clamp(20px, 11vw, 62px); }
-    #temp { font-size: clamp(14px, 7.5vw, 48px); }
-    #days { font-size: clamp(18px, 8.5vw, 52px); }
+    #time { font-size: clamp(20px, 12vw, 62px); }
+    #temp { font-size: clamp(14px, 8vw, 48px); }
+    #days { font-size: clamp(18px, 9vw, 52px); }
   }
 </style>
 </head>
@@ -146,38 +133,38 @@
   <div class="card">
     <div class="stage">
 
-      <!-- 左列 · 时间 -->
-      <div class="c-time">
-        <div class="num"><span id="time">--:--</span><span id="sec">:--</span></div>
+      <div class="pair">
+
+        <!-- 左列：时间 → 日期 → 农历（3 行） -->
+        <div class="col col--l">
+          <div class="num"><span id="time">--:--</span><span id="sec">:--</span></div>
+          <span id="date" class="sub sub--main">—</span>
+          <span id="lunar" class="sub">—</span>
+        </div>
+
+        <!-- 右列：温度 → 状况 → 高低 → 体感湿度（4 行，跟左列错开） -->
+        <div class="col col--r">
+          <div class="num"><span id="temp">—</span><span class="deg">°C</span></div>
+          <span id="desc" class="sub sub--main">正在读取…</span>
+          <span class="sub">最高<b id="hi">—</b>　最低<b id="lo">—</b></span>
+          <span class="sub">体感<b id="feel">—</b>　湿度<b id="hum">—</b></span>
+        </div>
+
       </div>
 
-      <!-- 右列 · 天气（跨两行，咬着时间和日期） -->
-      <div class="c-wx">
-        <span id="desc" class="sub sub--main">正在读取…</span>
-        <div class="num"><span id="temp">—</span><span class="deg">°C</span></div>
-        <span class="sub">最高<b id="hi">—</b>　最低<b id="lo">—</b></span>
-        <span class="sub">体感<b id="feel">—</b>　湿度<b id="hum">—</b></span>
+      <!-- 倒计时整组独占一行：天数在左、目标与剩余在右，别拆到两列去 -->
+      <div class="pair">
+        <div class="col col--l">
+          <div class="num"><span id="days">—</span><span class="unit">天</span></div>
+        </div>
+        <div class="col col--r">
+          <span class="sub sub--main"><span id="label">—</span> · <span id="target">—</span></span>
+          <span id="detail" class="sub">—</span>
+        </div>
       </div>
 
-      <!-- 左列 · 日期 -->
-      <div class="c-date">
-        <span id="date" class="sub sub--main">—</span>
-        <span id="lunar" class="sub">—</span>
-      </div>
-
-      <!-- 左列 · 倒计时天数 -->
-      <div class="c-days">
-        <div class="num"><span id="days">—</span><span class="unit">天</span></div>
-      </div>
-
-      <!-- 右列 · 倒计时附注，贴底与"天"同基线 -->
-      <div class="c-target">
-        <span class="sub sub--main"><span id="label">—</span> · <span id="target">—</span></span>
-        <span id="detail" class="sub">—</span>
-      </div>
-
-      <!-- 跨两列 · 今日一句 -->
-      <div class="c-quote">
+      <!-- 引文：跨满两列 -->
+      <div class="quote">
         <p id="text">—</p>
         <div class="by-row">
           <span id="by" class="sub">—</span>
@@ -187,7 +174,6 @@
 
     </div>
   </div>
-
 <script src="../assets/lunar.js"></script>
 <script>
 /* ═══ ① 时钟 ═══════════════════════════════════════════════ */
@@ -205,7 +191,7 @@
     elTime.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes());
     elSec.textContent  = ':' + pad(d.getSeconds());
 
-    // 公历一行、农历一行，两行叠着放在时间底下
+    // 公历一行、农历一行
     var key = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
     if (key !== lunarKey) {
       lunarKey = key;
@@ -340,7 +326,9 @@
     var s  = Math.floor(abs % 6e4 / 1e3);
 
     elDays.textContent = past ? '−' + d : d;
-    elDetail.textContent = (past ? '超出 ' : '余 ') + h + ' 时 ' + pad(mi) + ' 分 ' + pad(s) + ' 秒';
+    // 小时为 0 就别写“0 时”，免得看着像只剩 42 分钟
+    var tail = (h > 0 ? h + ' 时 ' : '') + pad(mi) + ' 分 ' + pad(s) + ' 秒';
+    elDetail.textContent = (past ? '超 ' : '余 ') + tail;
   }
   tick();
   setInterval(tick, 1000);
