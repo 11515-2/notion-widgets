@@ -17,10 +17,11 @@
   #temp { font-size: var(--big); }
   .deg  { font-size: calc(var(--big) * .34); }
 
-  /* 温度块做成横向舒展的长条，别是个方块 */
-  .temp-block {
+  /* 温度块做成横向舒展的长条，别是个方块；底色比顶部状态块亮一档，突出主次 */
+  .block.temp-block {
     padding-left: clamp(22px, 5.5vw, 48px);
     padding-right: clamp(22px, 5.5vw, 48px);
+    background: var(--surface-2);
   }
 
   /* 底部四项数据：2×2 网格、纯文字、数字加粗，别再堆一堆色块 */
@@ -33,7 +34,7 @@
   }
   .grid span {
     font-size: clamp(10px, 2vh, 13px);
-    color: var(--ink-3);
+    color: var(--ink-2);
     letter-spacing: .02em;
     white-space: nowrap;
   }
