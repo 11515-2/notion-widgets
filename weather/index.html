@@ -12,52 +12,32 @@
   })();
 </script>
 <style>
-  .temp-row {
-    display: flex;
-    align-items: baseline;
-    justify-content: center;
-    gap: clamp(4px, 1vw, 10px);
-  }
-  #temp {
-    font-size: clamp(38px, min(31vh, 16vw), 152px);
-  }
-  .deg {
-    font-family: var(--mono);
-    font-weight: 300;
-    font-size: clamp(18px, min(12vh, 6vw), 52px);
-    color: var(--ink-2);
-    line-height: 1;
-  }
-  #desc {
-    text-align: center;
-    font-size: clamp(11px, 2.4vh, 18px);
-    color: var(--ink-2);
-    letter-spacing: .08em;
-  }
-  .cities { display: flex; gap: 6px; }
+  #temp { font-size: clamp(34px, min(27vh, 13.5vw), 136px); }
+  .deg  { font-size: clamp(16px, min(11vh, 5.5vw), 46px); }
+  .cities { display: flex; gap: 6px; flex-wrap: wrap; }
 </style>
 </head>
 <body>
   <div class="card">
     <div class="top">
       <div class="cities">
-        <button class="pill" id="c-dt" aria-pressed="true" type="button">大同</button>
-        <button class="pill" id="c-sz" aria-pressed="false" type="button">苏州</button>
+        <button class="chip" id="c-dt" aria-pressed="true" type="button">大同</button>
+        <button class="chip" id="c-sz" aria-pressed="false" type="button">苏州</button>
       </div>
-      <span class="label" id="stamp">—</span>
+      <span class="chip" id="stamp">—</span>
     </div>
 
     <div class="main">
-      <div class="temp-row">
+      <div class="block">
         <p class="display" id="temp">—</p>
-        <span class="deg">°C</span>
+        <span class="unit deg">°C</span>
       </div>
-      <p id="desc" class="sub">正在读取…</p>
+      <span class="chip" id="desc">正在读取…</span>
     </div>
 
     <div class="foot">
-      <span id="range">—</span>
-      <span id="extra">—</span>
+      <span class="chip" id="range">—</span>
+      <span class="chip" id="extra">—</span>
     </div>
   </div>
 

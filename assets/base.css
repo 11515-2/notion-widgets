@@ -1,16 +1,36 @@
 /* ============================================================
    notion-widgets · 共用设计系统
-   黑白 · Material You 形态 · 自动深浅色 · 铺满容器
-   —— 无任何外部依赖、无任何密钥
+   Maple Mono NF CN（子集化本地托管）· 粗体 · 纯黑白
+   每个元素自带边框与背景 · 自动深浅色 · 铺满容器
+   —— 无外部依赖、无任何密钥
    ============================================================ */
+
+/* 字体：本地托管子集，只含组件实际用到的 593 个字符，
+   两个文件合计约 288KB。来源 Maple Mono v7.9，OFL-1.1，
+   许可全文见 assets/fonts/OFL.txt */
+@font-face {
+  font-family: "Maple Mono NF CN Web";
+  src: url("./fonts/maple-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Maple Mono NF CN Web";
+  src: url("./fonts/maple-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   color-scheme: light dark;
 
-  /* 圆角：统一一套，外部卡片大圆角 / 内部小元素小圆角 */
-  --r-lg: 28px;
-  --r-md: 18px;
-  --r-sm: 12px;
+  /* 圆角：统一一套，偏方正 */
+  --r-lg: 20px;
+  --r-md: 12px;
+  --r-sm: 8px;
 
   /* 间距 4 基数 */
   --s1: 4px;
@@ -20,19 +40,23 @@
   --s5: 22px;
   --s6: 32px;
 
-  /* 浅色：纯黑白灰，不带任何色相 */
+  /* 浅色：纯黑白灰，零色相 */
   --bg: #ffffff;
   --surface: #f4f4f4;
-  --surface-2: #ebebeb;
+  --surface-2: #e9e9e9;
   --ink: #0a0a0a;
-  --ink-2: #6e6e6e;
-  --ink-3: #9a9a9a;
-  --line: #e6e6e6;
-  --line-strong: #d4d4d4;
+  --ink-2: #5f5f5f;
+  --ink-3: #8a8a8a;
+  --line: #e2e2e2;
+  --line-strong: #cfcfcf;
 
-  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
-          "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  /* 优先用手上托管那份，保证各设备一致；缺字再回落本机与系统 */
+  --font: "Maple Mono NF CN Web", "Maple Mono NF CN", ui-monospace,
+          "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --mono: var(--font);
+
+  --w-body: 600;    /* 辅助文字也保持偏粗 */
+  --w-strong: 700;  /* 主数字 / 关键信息 */
 
   --ease: cubic-bezier(.22, .61, .36, 1);
 }
@@ -41,40 +65,39 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #0a0a0a;
-    --surface: #191919;
+    --surface: #1a1a1a;
     --surface-2: #262626;
     --ink: #fafafa;
-    --ink-2: #9e9e9e;
-    --ink-3: #757575;
-    --line: #242424;
-    --line-strong: #3a3a3a;
+    --ink-2: #b4b4b4;
+    --ink-3: #8a8a8a;
+    --line: #2a2a2a;
+    --line-strong: #3d3d3d;
   }
 }
 
-/* 手动指定：?theme=dark 或 ?theme=light
-   —— Notion 页面配色和系统不一致时用这个强制 */
+/* 手动强制：?theme=dark / ?theme=light */
 :root[data-theme="dark"] {
   color-scheme: dark;
   --bg: #0a0a0a;
-  --surface: #191919;
+  --surface: #1a1a1a;
   --surface-2: #262626;
   --ink: #fafafa;
-  --ink-2: #9e9e9e;
-  --ink-3: #757575;
-  --line: #242424;
-  --line-strong: #3a3a3a;
+  --ink-2: #b4b4b4;
+  --ink-3: #8a8a8a;
+  --line: #2a2a2a;
+  --line-strong: #3d3d3d;
 }
 
 :root[data-theme="light"] {
   color-scheme: light;
   --bg: #ffffff;
   --surface: #f4f4f4;
-  --surface-2: #ebebeb;
+  --surface-2: #e9e9e9;
   --ink: #0a0a0a;
-  --ink-2: #6e6e6e;
-  --ink-3: #9a9a9a;
-  --line: #e6e6e6;
-  --line-strong: #d4d4d4;
+  --ink-2: #5f5f5f;
+  --ink-3: #8a8a8a;
+  --line: #e2e2e2;
+  --line-strong: #cfcfcf;
 }
 
 * { box-sizing: border-box; }
@@ -87,135 +110,169 @@ html, body {
 
 body {
   font-family: var(--font);
+  font-weight: var(--w-body);
   color: var(--ink);
   background: transparent;   /* 圆角四角透出 Notion 底色 */
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
-/* ── 唯一容器：铺满 iframe，四边不留白 ───────────────────── */
+/* ── 外框：铺满 iframe，只留一层细描边 ─────────────────── */
 .card {
   height: 100%;
   width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: var(--s3);
-  padding: clamp(14px, 4.6vh, 30px) clamp(16px, 4.2vw, 30px);
+  gap: clamp(6px, 1.5vh, 11px);
+  padding: clamp(9px, 2.4vh, 16px);
   background: var(--bg);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
   overflow: hidden;
 }
 
-/* 顶栏：小标签 + 可选动作，字号小、字距开 */
-.top {
-  display: flex;
+/* ── 元素一：chip —— 小信息块，自带边框与底色 ─────────── */
+.chip {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--s3);
-  min-height: 0;
-}
-
-.label {
-  font-size: clamp(10px, 2vh, 13px);
-  font-weight: 600;
-  letter-spacing: .16em;
-  text-transform: uppercase;
+  justify-content: center;
+  gap: 5px;
+  padding: clamp(4px, 1.1vh, 7px) clamp(9px, 1.6vw, 14px);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  border-radius: var(--r-md);
+  font-family: var(--font);
+  font-size: clamp(9.5px, 1.95vh, 12.5px);
+  font-weight: var(--w-body);
+  letter-spacing: .01em;
+  line-height: 1.2;
   color: var(--ink-2);
   white-space: nowrap;
+  min-width: 0;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* 主体：纵向居中，撑满剩余空间 */
-.main {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 0;
-  gap: var(--s2);
-}
+.chip b { font-weight: var(--w-strong); color: var(--ink); }
 
-/* 底部一行注释 */
-.foot {
-  font-size: clamp(10px, 1.95vh, 12.5px);
-  color: var(--ink-2);
-  letter-spacing: .04em;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--s2);
-  min-height: 0;
-  white-space: nowrap;
-}
-
-/* 数字：等宽、紧字距，Material You 的大气感 */
-.display {
-  font-family: var(--mono);
-  font-weight: 300;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -.03em;
-  line-height: .95;
-  margin: 0;
-}
-
-/* 说明文字 */
-.sub {
-  font-size: clamp(10px, 2.1vh, 15px);
-  color: var(--ink-2);
-  letter-spacing: .02em;
-  margin: 0;
-}
-
-/* pill：内部小圆角，黑白描边 */
-.pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 11px;
-  border-radius: 999px;
-  border: 1px solid var(--line-strong);
-  background: var(--surface);
-  color: var(--ink);
-  font-family: var(--font);
-  font-size: clamp(10px, 1.95vh, 12.5px);
-  font-weight: 500;
-  letter-spacing: .02em;
-  cursor: pointer;
-  transition: background .18s var(--ease), color .18s var(--ease),
-              border-color .18s var(--ease);
-  -webkit-tap-highlight-color: transparent;
-}
-
-.pill:hover { background: var(--surface-2); }
-
-.pill[aria-pressed="true"] {
+/* 反色 chip：当前状态 / 主标签 */
+.chip--ink {
   background: var(--ink);
   color: var(--bg);
   border-color: var(--ink);
 }
+.chip--ink b { color: var(--bg); }
 
-.pill:focus-visible {
+/* 可点的 chip（城市切换） */
+button.chip {
+  cursor: pointer;
+  transition: background .16s var(--ease), color .16s var(--ease),
+              border-color .16s var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+button.chip:hover { background: var(--surface-2); }
+button.chip[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+}
+button.chip:focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: 2px;
 }
 
-/* 极细分隔线 */
-.hr {
-  height: 1px;
-  background: var(--line);
-  width: 100%;
-  flex: 0 0 auto;
+/* ── 元素二：block —— 主信息块，更大更厚 ──────────────── */
+.block {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: clamp(6px, 1.4vw, 14px);
+  padding: clamp(6px, 1.8vh, 16px) clamp(12px, 2.8vw, 26px);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  min-width: 0;
+  max-width: 100%;
 }
 
-/* 加载 / 出错：保持高度不跳 */
-.state {
-  color: var(--ink-3);
-  font-size: clamp(10px, 2vh, 14px);
-  letter-spacing: .04em;
+/* ── 三行骨架 ─────────────────────────────────────────── */
+.top,
+.foot {
+  display: flex;
+  align-items: center;
+  gap: clamp(4px, 1.2vw, 8px);
+  min-height: clamp(22px, 5.2vh, 32px);
+  flex-wrap: wrap;          /* 窄屏自动换行，永不溢出 */
 }
+
+.top { justify-content: space-between; }
+.foot { justify-content: space-between; }
+
+.main {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(4px, 1.2vh, 10px);
+  min-height: 0;
+  min-width: 0;
+}
+
+/* 主体里的一行小 chip（比如秒 + 日期） */
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(4px, 1vw, 8px);
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* ── 文字 ─────────────────────────────────────────────── */
+.display {
+  font-family: var(--font);
+  font-weight: var(--w-strong);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.02em;
+  line-height: .92;
+  margin: 0;
+}
+
+.unit {
+  font-family: var(--font);
+  font-weight: var(--w-body);
+  color: var(--ink-2);
+  line-height: 1;
+}
+
+.sub {
+  margin: 0;
+  font-size: clamp(10px, 2.1vh, 15px);
+  font-weight: var(--w-body);
+  color: var(--ink-2);
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+
+/* 兼容旧类名 */
+.label { font-size: clamp(9.5px, 1.95vh, 12.5px); font-weight: var(--w-body); letter-spacing: .1em; text-transform: uppercase; }
+.pill {
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  padding: clamp(4px, 1.1vh, 7px) clamp(9px, 1.6vw, 14px);
+  border: 1px solid var(--line-strong); background: var(--surface);
+  border-radius: var(--r-md); color: var(--ink-2);
+  font-family: var(--font); font-weight: var(--w-body);
+  font-size: clamp(9.5px, 1.95vh, 12.5px); letter-spacing: .04em;
+  cursor: pointer; white-space: nowrap;
+  transition: background .16s var(--ease), color .16s var(--ease), border-color .16s var(--ease);
+}
+.pill[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.state { color: var(--ink-3); font-size: clamp(10px, 2vh, 14px); letter-spacing: .04em; }
+.hr { height: 1px; background: var(--line); width: 100%; flex: 0 0 auto; }
 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }

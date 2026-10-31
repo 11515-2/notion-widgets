@@ -12,47 +12,42 @@
   })();
 </script>
 <style>
-  .quote-box {
+  .quote-block {
+    width: 100%;
+    padding: clamp(10px, 2.6vh, 22px) clamp(12px, 2.6vw, 22px);
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100%;
-    padding: 0 4%;
+    min-height: 0;
   }
   #text {
     margin: 0;
     text-align: center;
-    font-size: clamp(13px, min(3.6vh, 2.4vw), 26px);
+    font-size: clamp(12px, min(3.4vh, 2.2vw), 24px);
     line-height: 1.6;
-    font-weight: 400;
-    letter-spacing: .015em;
+    font-weight: var(--w-strong);
+    letter-spacing: .01em;
     color: var(--ink);
     text-wrap: balance;
-  }
-  #by {
-    text-align: center;
-    font-size: clamp(9px, 1.9vh, 13px);
-    color: var(--ink-3);
-    letter-spacing: .1em;
   }
 </style>
 </head>
 <body>
   <div class="card">
     <div class="top">
-      <span class="label">Today</span>
-      <span class="label" id="no">—</span>
+      <span class="chip">Today</span>
+      <span class="chip" id="no">—</span>
     </div>
 
     <div class="main">
-      <div class="quote-box">
+      <div class="block quote-block">
         <p id="text">—</p>
       </div>
     </div>
 
     <div class="foot">
-      <span id="by">—</span>
-      <span id="date">—</span>
+      <span class="chip" id="by">—</span>
+      <span class="chip" id="date">—</span>
     </div>
   </div>
 
