@@ -12,58 +12,45 @@
   })();
 </script>
 <style>
-  #time { font-size: clamp(34px, min(26vh, 13vw), 132px); }
-  #sec  { color: var(--ink); font-weight: 700; }
+  #time { font-size: clamp(32px, min(25vh, 12.5vw), 128px); }
 </style>
 </head>
 <body>
   <div class="card">
-    <div class="top">
-      <span class="chip">Local time</span>
-      <span class="chip" id="sec">-- 秒</span>
-    </div>
-
     <div class="main">
       <div class="block">
-        <p class="display" id="time">--:--</p>
+        <p class="display" id="time">--:--</p><span class="sec" id="sec">:--</span>
       </div>
-      <span class="chip" id="date">—</span>
-    </div>
-
-    <div class="foot">
-      <span class="chip" id="week">—</span>
-      <span class="chip" id="md">—</span>
+      <span class="chip chip--strong" id="date">—</span>
     </div>
   </div>
 
+<script src="../assets/lunar.js"></script>
 <script>
 (function () {
   var WEEK = ['周日','周一','周二','周三','周四','周五','周六'];
   var elTime = document.getElementById('time');
   var elSec  = document.getElementById('sec');
   var elDate = document.getElementById('date');
-  var elMd   = document.getElementById('md');
-  var elWeek = document.getElementById('week');
 
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
 
-  // ISO 8601 周数
-  function isoWeek(d) {
-    var t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-    var day = t.getUTCDay() || 7;
-    t.setUTCDate(t.getUTCDate() + 4 - day);
-    var y0 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
-    return Math.ceil(((t - y0) / 864e5 + 1) / 7);
-  }
+  var lunarKey = '';
 
   function tick() {
     var d = new Date();
     elTime.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes());
-    elSec.textContent  = pad(d.getSeconds()) + ' 秒';
-    elDate.textContent = d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate())
-                       + ' ' + WEEK[d.getDay()];
-    elWeek.textContent = '第 ' + isoWeek(d) + ' 周';
-    elMd.textContent   = '第 ' + Math.ceil((d - new Date(d.getFullYear(), 0, 1)) / 864e5) + ' / 365 天';
+    elSec.textContent  = ':' + pad(d.getSeconds());
+
+    // 农历一天才变一次，算一次缓存住
+    var key = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+    if (key !== lunarKey) {
+      lunarKey = key;
+      var lunar = '';
+      try { lunar = (typeof lunarText === 'function') ? lunarText(d) : ''; } catch (e) {}
+      elDate.textContent = d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate())
+                         + ' ' + WEEK[d.getDay()] + (lunar ? '　' + lunar : '');
+    }
   }
 
   tick();

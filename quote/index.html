@@ -14,7 +14,7 @@
 <style>
   .quote-block {
     width: 100%;
-    padding: clamp(10px, 2.6vh, 22px) clamp(12px, 2.6vw, 22px);
+    padding: clamp(11px, 2.8vh, 24px) clamp(13px, 2.8vw, 24px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -34,20 +34,14 @@
 </head>
 <body>
   <div class="card">
-    <div class="top">
-      <span class="chip">Today</span>
-      <span class="chip" id="no">—</span>
-    </div>
-
     <div class="main">
       <div class="block quote-block">
         <p id="text">—</p>
       </div>
-    </div>
-
-    <div class="foot">
-      <span class="chip" id="by">—</span>
-      <span class="chip" id="date">—</span>
+      <div class="row">
+        <span class="chip" id="by">—</span>
+        <span class="chip" id="date">—</span>
+      </div>
     </div>
   </div>
 
@@ -127,8 +121,6 @@
   document.getElementById('by').textContent = item[1];
   document.getElementById('date').textContent =
     now.getFullYear() + '.' + pad(now.getMonth() + 1) + '.' + pad(now.getDate());
-  document.getElementById('no').textContent =
-    ('00' + (idx + 1)).slice(-2) + ' / ' + POOL.length;
 })();
 </script>
 </body>

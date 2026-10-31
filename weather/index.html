@@ -12,38 +12,33 @@
   })();
 </script>
 <style>
-  #temp { font-size: clamp(34px, min(27vh, 13.5vw), 136px); }
-  .deg  { font-size: clamp(16px, min(11vh, 5.5vw), 46px); }
-  .cities { display: flex; gap: 6px; flex-wrap: wrap; }
+  #temp { font-size: clamp(32px, min(24vh, 12vw), 124px); }
+  .deg  { font-size: clamp(15px, min(10vh, 5vw), 44px); }
+  .cities { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
 </style>
 </head>
 <body>
   <div class="card">
-    <div class="top">
-      <div class="cities">
-        <button class="chip" id="c-dt" aria-pressed="true" type="button">大同</button>
-        <button class="chip" id="c-sz" aria-pressed="false" type="button">苏州</button>
-      </div>
-      <span class="chip" id="stamp">—</span>
-    </div>
-
     <div class="main">
       <div class="block">
         <p class="display" id="temp">—</p>
         <span class="unit deg">°C</span>
       </div>
       <span class="chip" id="desc">正在读取…</span>
-    </div>
-
-    <div class="foot">
-      <span class="chip" id="range">—</span>
-      <span class="chip" id="extra">—</span>
+      <div class="row">
+        <span class="chip" id="range">—</span>
+        <span class="chip" id="extra">—</span>
+      </div>
+      <div class="seg">
+        <button id="c-dt" aria-pressed="true" type="button">大同</button>
+        <button id="c-sz" aria-pressed="false" type="button">苏州</button>
+      </div>
     </div>
   </div>
 
 <script>
 (function () {
-  // ── 只用 Open-Meteo，免费、无需 API key ──────────────────
+  // ── 只用 Open-Meteo，免费、无需 key ──────────────────────
   var CITIES = {
     dt: { name: '大同', lat: 40.0933, lon: 113.2998 },
     sz: { name: '苏州', lat: 31.2989, lon: 120.5853 }
@@ -66,7 +61,6 @@
   var elDesc  = document.getElementById('desc');
   var elRange = document.getElementById('range');
   var elExtra = document.getElementById('extra');
-  var elStamp = document.getElementById('stamp');
   var btnDt   = document.getElementById('c-dt');
   var btnSz   = document.getElementById('c-sz');
 
@@ -90,27 +84,23 @@
     btnSz.setAttribute('aria-pressed', current === 'sz' ? 'true' : 'false');
   }
 
-  function show(state, msg) {
-    if (state === 'error') {
-      elTemp.textContent = '—';
-      elDesc.textContent = msg || '暂时读不到天气';
-      elRange.textContent = '—';
-      elExtra.textContent = '—';
-    }
+  function fail(msg) {
+    elTemp.textContent = '—';
+    elDesc.textContent = msg || '暂时读不到天气';
+    elRange.textContent = '—';
+    elExtra.textContent = '—';
   }
 
   function render(d, city) {
     var cur = d.current || {};
     var day = (d.daily || {});
-    var t   = Math.round(cur.temperature_2m);
-    elTemp.textContent = t;
-    elDesc.textContent = (WMO[cur.weather_code] || '—') + '　' + city.name;
+    elTemp.textContent = Math.round(cur.temperature_2m);
+    elDesc.textContent = (WMO[cur.weather_code] || '—') + ' · ' + city.name;
     var hi = Math.round((day.temperature_2m_max || [])[0]);
     var lo = Math.round((day.temperature_2m_min || [])[0]);
     elRange.textContent = isFinite(hi) && isFinite(lo) ? lo + '° / ' + hi + '°' : '—';
-    elExtra.textContent = '体感 ' + Math.round(cur.apparent_temperature) + '°　湿度 ' + Math.round(cur.relative_humidity_2m) + '%';
-    var now = new Date();
-    elStamp.textContent = ('0' + now.getHours()).slice(-2) + ':' + ('0' + now.getMinutes()).slice(-2) + ' 更新';
+    elExtra.textContent = '体感 ' + Math.round(cur.apparent_temperature) + '°　湿度 '
+                        + Math.round(cur.relative_humidity_2m) + '%';
   }
 
   function fetchWeather(key) {
@@ -141,7 +131,7 @@
       })
       .catch(function () {
         clearTimeout(timer);
-        show('error', '暂时读不到天气');
+        fail('暂时读不到天气');
       });
   }
 

@@ -124,11 +124,12 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: clamp(6px, 1.5vh, 11px);
-  padding: clamp(9px, 2.4vh, 16px);
+  gap: clamp(8px, 2vh, 16px);
+  padding: clamp(12px, 3vh, 22px);
   background: var(--bg);
   border-radius: var(--r-lg);
   overflow: hidden;
+  justify-content: center;      /* 去掉四角信息后，内容整体居中 */
 }
 
 /* ── 元素一：chip —— 小信息块，自带边框与底色 ─────────── */
@@ -154,6 +155,44 @@ body {
 }
 
 .chip b { font-weight: var(--w-strong); color: var(--ink); }
+
+/* 想强调的 chip：文字用主色，不带反色块 */
+.chip--strong { color: var(--ink); }
+
+/* 分段切换（城市之类的二选一）：一体化容器，不是散落的按钮 */
+.seg {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  background: var(--surface);
+  border-radius: var(--r-md);
+}
+.seg button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--ink-2);
+  font-family: var(--font);
+  font-weight: var(--w-body);
+  font-size: clamp(9.5px, 1.95vh, 12.5px);
+  letter-spacing: .01em;
+  padding: clamp(4px, 1.1vh, 7px) clamp(9px, 1.5vw, 13px);
+  border-radius: calc(var(--r-md) - 2px);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .16s var(--ease), color .16s var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--bg);
+}
+.seg button:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
 
 /* 反色 chip：当前状态 / 主标签 */
 .chip--ink {
@@ -208,14 +247,15 @@ button.chip:focus-visible {
 .foot { justify-content: space-between; }
 
 .main {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(4px, 1.2vh, 10px);
+  gap: clamp(6px, 1.8vh, 14px);
   min-height: 0;
   min-width: 0;
+  width: 100%;
 }
 
 /* 主体里的一行小 chip（比如秒 + 日期） */
@@ -244,6 +284,16 @@ button.chip:focus-visible {
   font-weight: var(--w-body);
   color: var(--ink-2);
   line-height: 1;
+}
+
+/* 主块内的秒数：跟大数字同一基线，压低一号 */
+.sec {
+  font-family: var(--font);
+  font-size: .46em;
+  font-weight: 600;
+  color: var(--ink-2);
+  letter-spacing: 0;
+  margin-left: .06em;
 }
 
 .sub {
