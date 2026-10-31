@@ -14,31 +14,25 @@
 <style>
   #temp { font-size: clamp(32px, min(24vh, 12vw), 124px); }
   .deg  { font-size: clamp(15px, min(10vh, 5vw), 44px); }
-  .cities { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
 </style>
 </head>
 <body>
   <div class="card">
     <div class="main">
+      <span class="chip chip--strong" id="desc">正在读取…</span>
       <div class="block">
         <p class="display" id="temp">—</p>
         <span class="unit deg">°C</span>
       </div>
-      <span class="chip" id="desc">正在读取…</span>
-      <div class="row">
-        <span class="chip" id="range">—</span>
-        <span class="chip" id="extra">—</span>
-      </div>
-      <div class="seg">
-        <button id="c-dt" aria-pressed="true" type="button">大同</button>
-        <button id="c-sz" aria-pressed="false" type="button">苏州</button>
-      </div>
+      <span class="chip" id="range">—</span>
+      <span class="chip" id="extra">—</span>
     </div>
   </div>
 
 <script>
 (function () {
   // ── 只用 Open-Meteo，免费、无需 key ──────────────────────
+  // 换城市：在嵌入地址后面加 ?city=sz（默认大同），不占组件界面
   var CITIES = {
     dt: { name: '大同', lat: 40.0933, lon: 113.2998 },
     sz: { name: '苏州', lat: 31.2989, lon: 120.5853 }
@@ -61,28 +55,13 @@
   var elDesc  = document.getElementById('desc');
   var elRange = document.getElementById('range');
   var elExtra = document.getElementById('extra');
-  var btnDt   = document.getElementById('c-dt');
-  var btnSz   = document.getElementById('c-sz');
 
-  var current = 'dt';
+  var q = new URLSearchParams(location.search);
+  var wanted = q.get('city');
+  var current = (wanted && CITIES[wanted]) ? wanted : 'dt';
+
   var cache = {};         // 内存缓存，10 分钟
   var TTL = 10 * 60 * 1000;
-
-  // Notion 的 iframe 里第三方存储可能被禁，全部 try 住
-  function loadPref() {
-    try {
-      var v = localStorage.getItem('nw-city');
-      if (v && CITIES[v]) current = v;
-    } catch (e) {}
-  }
-  function savePref(v) {
-    try { localStorage.setItem('nw-city', v); } catch (e) {}
-  }
-
-  function paintButtons() {
-    btnDt.setAttribute('aria-pressed', current === 'dt' ? 'true' : 'false');
-    btnSz.setAttribute('aria-pressed', current === 'sz' ? 'true' : 'false');
-  }
 
   function fail(msg) {
     elTemp.textContent = '—';
@@ -98,7 +77,9 @@
     elDesc.textContent = (WMO[cur.weather_code] || '—') + ' · ' + city.name;
     var hi = Math.round((day.temperature_2m_max || [])[0]);
     var lo = Math.round((day.temperature_2m_min || [])[0]);
-    elRange.textContent = isFinite(hi) && isFinite(lo) ? lo + '° / ' + hi + '°' : '—';
+    elRange.textContent = (isFinite(hi) && isFinite(lo))
+      ? '最高 ' + hi + '°　最低 ' + lo + '°'
+      : '—';
     elExtra.textContent = '体感 ' + Math.round(cur.apparent_temperature) + '°　湿度 '
                         + Math.round(cur.relative_humidity_2m) + '%';
   }
@@ -135,19 +116,6 @@
       });
   }
 
-  function switchTo(key) {
-    if (!CITIES[key]) return;
-    current = key;
-    savePref(key);
-    paintButtons();
-    fetchWeather(key);
-  }
-
-  btnDt.addEventListener('click', function () { switchTo('dt'); });
-  btnSz.addEventListener('click', function () { switchTo('sz'); });
-
-  loadPref();
-  paintButtons();
   fetchWeather(current);
   setInterval(function () { fetchWeather(current); }, TTL);
 })();

@@ -286,10 +286,10 @@ button.chip:focus-visible {
   line-height: 1;
 }
 
-/* 主块内的秒数：跟大数字同一基线，压低一号 */
+/* 主块内的秒数：跟大数字同一基线，一半大小 */
 .sec {
   font-family: var(--font);
-  font-size: .46em;
+  font-size: .5em;
   font-weight: 600;
   color: var(--ink-2);
   letter-spacing: 0;
