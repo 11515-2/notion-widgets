@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>notion-widgets</title>
+<link rel="stylesheet" href="assets/base.css">
+<style>
+  html, body { overflow: auto; }
+  body { background: var(--bg); padding: clamp(16px, 4vw, 40px); }
+  h1 {
+    font-size: clamp(18px, 2.6vw, 26px);
+    font-weight: 600;
+    letter-spacing: -.01em;
+    margin: 0 0 6px;
+  }
+  p.lead { color: var(--ink-2); font-size: 14px; margin: 0 0 28px; line-height: 1.6; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 14px;
+  }
+  a.tile {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: 18px;
+    transition: background .18s var(--ease), transform .18s var(--ease);
+  }
+  a.tile:hover { background: var(--surface-2); transform: translateY(-2px); }
+  a.tile b { display: block; font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  a.tile span { font-size: 12px; color: var(--ink-2); line-height: 1.5; }
+  code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--surface-2);
+    padding: 2px 6px;
+    border-radius: 6px;
+  }
+  .tip {
+    margin-top: 28px;
+    padding: 16px 18px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--ink-2);
+  }
+</style>
+</head>
+<body>
+  <h1>notion-widgets</h1>
+  <p class="lead">黑白 · Material You 形态 · 自动深浅色 · 一个 iframe 一个组件</p>
+
+  <div class="grid">
+    <a class="tile" href="clock/">
+      <b>时钟</b>
+      <span>实时时间 + 日期 + 当日进度</span>
+    </a>
+    <a class="tile" href="weather/">
+      <b>天气</b>
+      <span>大同 / 苏州可切换，Open-Meteo 数据</span>
+    </a>
+    <a class="tile" href="countdown/">
+      <b>倒计时</b>
+      <span>默认高考，支持 ?date= 自定义</span>
+    </a>
+    <a class="tile" href="quote/">
+      <b>今日一句</b>
+      <span>本地句池，一天一句，稳定不重复</span>
+    </a>
+  </div>
+
+  <div class="tip">
+    嵌进 Notion：输入 <code>/embed</code> → 粘贴组件地址 → 拖动调整高度。<br>
+    倒计时可带参数：<code>countdown/?date=2027-06-07&amp;label=高考</code><br>
+    所有组件都没有任何 API key，天气走 Open-Meteo 公开接口。
+  </div>
+</body>
+</html>

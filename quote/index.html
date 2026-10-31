@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>今日一句</title>
+<link rel="stylesheet" href="../assets/base.css">
+<script>
+  (function () {
+    var t = new URLSearchParams(location.search).get('theme');
+    if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+<style>
+  .quote-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 0 4%;
+  }
+  #text {
+    margin: 0;
+    text-align: center;
+    font-size: clamp(13px, min(3.6vh, 2.4vw), 26px);
+    line-height: 1.6;
+    font-weight: 400;
+    letter-spacing: .015em;
+    color: var(--ink);
+    text-wrap: balance;
+  }
+  #by {
+    text-align: center;
+    font-size: clamp(9px, 1.9vh, 13px);
+    color: var(--ink-3);
+    letter-spacing: .1em;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="top">
+      <span class="label">Today</span>
+      <span class="label" id="no">—</span>
+    </div>
+
+    <div class="main">
+      <div class="quote-box">
+        <p id="text">—</p>
+      </div>
+    </div>
+
+    <div class="foot">
+      <span id="by">—</span>
+      <span id="date">—</span>
+    </div>
+  </div>
+
+<script>
+(function () {
+  // 本地句子池，零外部请求。名言标注作者，自写的标 —
+  var POOL = [
+    ['在隆冬，我终于知道，我身上有一个不可战胜的夏天。', '加缪'],
+    ['重要的不是治愈，而是带着病痛活下去。', '加缪'],
+    ['我反抗，故我们存在。', '加缪'],
+    ['人是被判定为自由的。', '萨特'],
+    ['要爱具体的人，不要爱抽象的人。', '陀思妥耶夫斯基'],
+    ['最要紧的是：首先善良，其次诚实，再其次永远不要相互遗忘。', '陀思妥耶夫斯基'],
+    ['我不是在黑暗中，我是黑暗本身的一部分。', '—'],
+    ['哪有什么胜利可言，挺住意味着一切。', '里尔克'],
+    ['你必须改变你的生活。', '里尔克'],
+    ['你不需要离开房间。只需坐在桌前倾听。', '卡夫卡'],
+    ['我不匆忙，太阳和月亮也不匆忙。', '佩索阿'],
+    ['凡不可说的，应当沉默。', '维特根斯坦'],
+    ['慢的乐趣怎么失传了呢？', '昆德拉'],
+    ['一个人知道自己为什么而活，就可以忍受任何一种生活。', '尼采'],
+    ['我偏爱写诗的荒谬，胜过不写诗的荒谬。', '辛波斯卡'],
+    ['岁月不饶人，我亦未曾饶过岁月。', '木心'],
+    ['我是一个在黑暗中大雪纷飞的人哪。', '木心'],
+    ['所谓无底深渊，下去，也是前程万里。', '木心'],
+    ['生活最好的状态是冷冷清清的风风火火。', '木心'],
+
+    ['把今天过完，就是答案的一部分。', '—'],
+    ['不必一次想清楚一生，先想清楚这一页。', '—'],
+    ['焦虑多半是因为想得太远，而手边的事没做。', '—'],
+    ['你只需要把灯打开，黑暗就不能再占满房间。', '—'],
+    ['沉默不是没话说，是话太重。', '—'],
+    ['慢一点没关系，方向对就行。', '—'],
+    ['真正的自律，是不必跟自己讨价还价。', '—'],
+    ['孤独不是身边没人，是没有一个人听得懂你在说什么。', '—'],
+    ['休息不是浪费，是让齿轮咬得回去。', '—'],
+    ['身体比脑子诚实，累了它先说。', '—'],
+    ['有些日子用来前进，有些日子只用来站住。', '—'],
+    ['难过的时候不要做决定。', '—'],
+    ['把标准立在自己身上，别人的评价就只是参考。', '—'],
+    ['你已经比你以为的走得更远了。', '—'],
+    ['想不通的事先放下，答案常在走路时冒出来。', '—'],
+    ['一天里做成一件事就够了。', '—'],
+    ['不要在深夜评价自己。', '—'],
+    ['不用向任何人证明你在努力。', '—'],
+    ['把小事做对，秩序就回来了。', '—'],
+    ['能安静待一会儿的人，心里有地方。', '—'],
+    ['怕，是因为在乎；怕完了还是要去。', '—'],
+    ['所有的笨拙，都是还没熟的手。', '—'],
+    ['把话说清楚，比把话说漂亮重要。', '—'],
+    ['情绪来了先别动手，它待不了太久。', '—'],
+    ['对一个人最深的照顾，是记得他说过的事。', '—'],
+    ['你不需要被所有人喜欢，只需要被几个人认真对待。', '—'],
+    ['慢慢来，也是一种到。', '—'],
+    ['今天不必赢，今天别断。', '—'],
+    ['手边有热的东西，就不算太冷。', '—'],
+    ['读书是替自己找一些能一起说话的人。', '—']
+  ];
+
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+  var now = new Date();
+  var key = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
+
+  // 用日期做个稳定的散列 —— 同一天始终同一句，换天才换
+  var h = key;
+  h = (h ^ 61) ^ (h >>> 16);
+  h = h + (h << 3);
+  h = h ^ (h >>> 4);
+  h = h * 0x27d4eb2d;
+  h = h ^ (h >>> 15);
+
+  var idx = Math.abs(h) % POOL.length;
+  var item = POOL[idx];
+
+  document.getElementById('text').textContent = item[0];
+  document.getElementById('by').textContent = item[1];
+  document.getElementById('date').textContent =
+    now.getFullYear() + '.' + pad(now.getMonth() + 1) + '.' + pad(now.getDate());
+  document.getElementById('no').textContent =
+    ('00' + (idx + 1)).slice(-2) + ' / ' + POOL.length;
+})();
+</script>
+</body>
+</html>

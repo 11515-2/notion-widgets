@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>时钟</title>
+<link rel="stylesheet" href="../assets/base.css">
+<script>
+  (function () {
+    var t = new URLSearchParams(location.search).get('theme');
+    if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+<style>
+  .clock-wrap {
+    display: flex;
+    align-items: baseline;
+    gap: clamp(6px, 1.4vw, 16px);
+    justify-content: center;
+  }
+  #time {
+    font-size: clamp(38px, min(30vh, 15.5vw), 148px);
+  }
+  #sec {
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: 300;
+    font-size: clamp(13px, min(8vh, 4vw), 34px);
+    color: var(--ink-2);
+    letter-spacing: 0;
+  }
+  #date {
+    text-align: center;
+    font-size: clamp(10px, 2.2vh, 16px);
+    color: var(--ink-2);
+    letter-spacing: .1em;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="top">
+      <span class="label">Local time</span>
+      <span class="label" id="zone">CST</span>
+    </div>
+
+    <div class="main">
+      <div class="clock-wrap">
+        <p class="display" id="time">--:--</p>
+        <span id="sec">--</span>
+      </div>
+      <p id="date" class="sub">&nbsp;</p>
+    </div>
+
+    <div class="foot">
+      <span id="hello">—</span>
+      <span id="md">—</span>
+    </div>
+  </div>
+
+<script>
+(function () {
+  var WEEK = ['周日','周一','周二','周三','周四','周五','周六'];
+  var elTime = document.getElementById('time');
+  var elSec  = document.getElementById('sec');
+  var elDate = document.getElementById('date');
+  var elMd   = document.getElementById('md');
+  var elHello= document.getElementById('hello');
+  var elZone = document.getElementById('zone');
+
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+  // 按小时给一句极简问候（黑白极简风，不卖萌）
+  function greeting(h) {
+    if (h < 5)  return '夜深';
+    if (h < 8)  return '清晨';
+    if (h < 11) return '上午';
+    if (h < 13) return '正午';
+    if (h < 17) return '下午';
+    if (h < 19) return '傍晚';
+    if (h < 23) return '夜里';
+    return '深夜';
+  }
+
+  function tick() {
+    var d = new Date();
+    elTime.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes());
+    elSec.textContent  = pad(d.getSeconds());
+    elDate.textContent = d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate())
+                       + '　' + WEEK[d.getDay()];
+    elMd.textContent   = Math.ceil((d - new Date(d.getFullYear(), 0, 1)) / 864e5) + ' / 365';
+    elHello.textContent = greeting(d.getHours());
+
+    // 时区缩写，拿不到就留 CST（本机按北京时间用）
+    try {
+      var m = /\(([^)]+)\)/.exec(d.toString());
+      if (m && m[1] && m[1].length <= 8) elZone.textContent = m[1].toUpperCase();
+    } catch (e) {}
+  }
+
+  tick();
+  setInterval(tick, 1000);
+})();
+</script>
+</body>
+</html>
