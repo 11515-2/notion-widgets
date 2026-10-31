@@ -12,21 +12,53 @@
   })();
 </script>
 <style>
-  #temp { font-size: clamp(32px, min(24vh, 12vw), 124px); }
-  .deg  { font-size: clamp(15px, min(10vh, 5vw), 44px); }
+  /* 主字号存变量，单位跟着比例走，不用 em（em 相对 body 的 16px） */
+  .card { --big: clamp(30px, min(21vh, 10.5vw), 112px); }
+  #temp { font-size: var(--big); }
+  .deg  { font-size: calc(var(--big) * .34); }
+
+  /* 温度块做成横向舒展的长条，别是个方块 */
+  .temp-block {
+    padding-left: clamp(22px, 5.5vw, 48px);
+    padding-right: clamp(22px, 5.5vw, 48px);
+  }
+
+  /* 底部四项数据：2×2 网格、纯文字、数字加粗，别再堆一堆色块 */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(3px, .9vh, 7px) clamp(16px, 3.4vw, 30px);
+    justify-items: center;
+    margin-top: clamp(2px, .6vh, 6px);
+  }
+  .grid span {
+    font-size: clamp(10px, 2vh, 13px);
+    color: var(--ink-3);
+    letter-spacing: .02em;
+    white-space: nowrap;
+  }
+  .grid b {
+    color: var(--ink);
+    font-weight: 700;
+    margin-left: .2em;
+  }
 </style>
 </head>
 <body>
   <div class="card">
     <div class="main">
       <span class="chip chip--strong" id="desc">正在读取…</span>
-      <div class="block">
+
+      <div class="block temp-block">
         <p class="display" id="temp">—</p>
         <span class="unit deg">°C</span>
       </div>
-      <div class="row">
-        <span class="chip" id="range">—</span>
-        <span class="chip" id="extra">—</span>
+
+      <div class="grid">
+        <span>最高<b id="hi">—</b></span>
+        <span>最低<b id="lo">—</b></span>
+        <span>体感<b id="feel">—</b></span>
+        <span>湿度<b id="hum">—</b></span>
       </div>
     </div>
   </div>
@@ -34,7 +66,7 @@
 <script>
 (function () {
   // ── 只用 Open-Meteo，免费、无需 key ──────────────────────
-  // 换城市：在嵌入地址后面加 ?city=sz（默认大同），不占组件界面
+  // 换城市：嵌地址后加 ?city=sz（默认大同），不占组件界面
   var CITIES = {
     dt: { name: '大同', lat: 40.0933, lon: 113.2998 },
     sz: { name: '苏州', lat: 31.2989, lon: 120.5853 }
@@ -53,37 +85,42 @@
     95:'雷阵雨', 96:'雷暴冰雹', 99:'强雷暴冰雹'
   };
 
-  var elTemp  = document.getElementById('temp');
-  var elDesc  = document.getElementById('desc');
-  var elRange = document.getElementById('range');
-  var elExtra = document.getElementById('extra');
+  var elTemp = document.getElementById('temp');
+  var elDesc = document.getElementById('desc');
+  var elHi   = document.getElementById('hi');
+  var elLo   = document.getElementById('lo');
+  var elFeel = document.getElementById('feel');
+  var elHum  = document.getElementById('hum');
 
   var q = new URLSearchParams(location.search);
   var wanted = q.get('city');
   var current = (wanted && CITIES[wanted]) ? wanted : 'dt';
 
-  var cache = {};         // 内存缓存，10 分钟
+  var cache = {};
   var TTL = 10 * 60 * 1000;
+
+  function dash(el, txt) { el.textContent = txt; }
 
   function fail(msg) {
     elTemp.textContent = '—';
     elDesc.textContent = msg || '暂时读不到天气';
-    elRange.textContent = '—';
-    elExtra.textContent = '—';
+    dash(elHi, '—'); dash(elLo, '—'); dash(elFeel, '—'); dash(elHum, '—');
   }
 
   function render(d, city) {
     var cur = d.current || {};
     var day = (d.daily || {});
+
     elTemp.textContent = Math.round(cur.temperature_2m);
     elDesc.textContent = (WMO[cur.weather_code] || '—') + ' · ' + city.name;
+
     var hi = Math.round((day.temperature_2m_max || [])[0]);
     var lo = Math.round((day.temperature_2m_min || [])[0]);
-    elRange.textContent = (isFinite(hi) && isFinite(lo))
-      ? '最高 ' + hi + '°　最低 ' + lo + '°'
-      : '—';
-    elExtra.textContent = '体感 ' + Math.round(cur.apparent_temperature) + '°　湿度 '
-                        + Math.round(cur.relative_humidity_2m) + '%';
+
+    dash(elHi,   isFinite(hi) ? hi + '°' : '—');
+    dash(elLo,   isFinite(lo) ? lo + '°' : '—');
+    dash(elFeel, Math.round(cur.apparent_temperature) + '°');
+    dash(elHum,  Math.round(cur.relative_humidity_2m) + '%');
   }
 
   function fetchWeather(key) {
