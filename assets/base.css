@@ -286,10 +286,10 @@ button.chip:focus-visible {
   line-height: 1;
 }
 
-/* 主块内的秒数：跟大数字同一基线，一半大小 */
+/* 主块内的秒数：跟大数字同一基线。字号由各组件按主字号的一半自行指定，
+   不要在这里用 em —— em 是相对父元素（body 16px），不是相对大数字 */
 .sec {
   font-family: var(--font);
-  font-size: .5em;
   font-weight: 600;
   color: var(--ink-2);
   letter-spacing: 0;
