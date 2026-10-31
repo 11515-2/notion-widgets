@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>总览</title>
+<link rel="stylesheet" href="../assets/base.css">
+<script>
+  (function () {
+    var q = new URLSearchParams(location.search);
+    var t = q.get('theme');
+    if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+    if (q.get('solid') === '1') document.documentElement.setAttribute('data-solid', '');
+  })();
+</script>
+<style>
+  /* ═══ 四格布局 ═══════════════════════════════════════════════
+     2×2 网格。间距走 vh：太小四块粘成一坨，太大又散；
+     1.8vh 在 400~700px 高度区间落在 7~13px，刚好看得出是四块又不是四座岛。 */
+  .card { padding: clamp(10px, 2vh, 18px); }
+
+  .combo {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: clamp(8px, 1.8vh, 16px);
+  }
+
+  .panel {
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(4px, 1.1vh, 10px);
+    padding: clamp(8px, 1.9vh, 16px) clamp(9px, 1.8vw, 16px);
+    background: var(--surface);
+    border-radius: var(--r-md);
+    overflow: hidden;
+  }
+
+  /* 面板内的小块再深/亮一级 —— 有层次才不像贴纸，也才分得清主次 */
+  .chip {
+    background: var(--surface-2);
+    font-size: clamp(9px, min(3.4vh, 2.4vw), 16px);
+    padding: clamp(3px, .8vh, 6px) clamp(7px, 1.3vw, 12px);
+  }
+
+  .row {
+    gap: clamp(5px, 1.1vw, 10px);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* ─── ① 时钟 ─────────────────────────────────────────── */
+  .time-row {
+    display: flex;
+    align-items: baseline;
+    gap: clamp(2px, .5vw, 5px);
+    line-height: 1;
+    color: var(--ink);
+    font-weight: var(--w-strong);
+    letter-spacing: -.02em;
+  }
+  .p-clock #time { font-size: clamp(22px, min(13vh, 9vw), 120px); }
+  .p-clock #sec  { font-size: clamp(11px, min(6.5vh, 4.5vw), 60px); color: var(--ink-2); }
+
+  /* ─── ② 天气 ─────────────────────────────────────────── */
+  .temp-row {
+    display: flex;
+    align-items: baseline;
+    line-height: 1;
+    color: var(--ink);
+    font-weight: var(--w-strong);
+  }
+  .p-weather #temp { font-size: clamp(20px, min(13vh, 9vw), 112px); letter-spacing: -.02em; }
+  .p-weather .deg  {
+    font-size: clamp(9px, min(4.4vh, 3vw), 36px);
+    color: var(--ink-2);
+    margin-left: .12em;
+  }
+
+  /* 四项数据：两列等宽（auto），标签贴左、数字贴右，跟单组件那版一个规格 */
+  .mini {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: clamp(3px, .9vh, 7px) clamp(9px, 2.2vw, 20px);
+    justify-content: center;
+  }
+  .mini span {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: clamp(5px, 1.2vw, 10px);
+    font-size: clamp(9px, min(3.1vh, 2.15vw), 15px);
+    color: var(--ink-2);
+    letter-spacing: .02em;
+    white-space: nowrap;
+  }
+  .mini b { color: var(--ink); font-weight: var(--w-strong); }
+
+  /* ─── ③ 倒计时 ───────────────────────────────────────── */
+  .days-row {
+    display: flex;
+    align-items: baseline;
+    gap: clamp(3px, .7vw, 7px);
+    line-height: 1;
+    color: var(--ink);
+    font-weight: var(--w-strong);
+  }
+  .p-count #days { font-size: clamp(22px, min(13vh, 9vw), 112px); letter-spacing: -.02em; }
+  .p-count .unit {
+    font-size: clamp(10px, min(4.6vh, 3vw), 28px);
+    color: var(--ink-2);
+    letter-spacing: .08em;
+  }
+
+  /* ─── ④ 今日一句 ─────────────────────────────────────── */
+  .p-quote #text {
+    margin: 0;
+    text-align: center;
+    /* 这一格信息量只有一句话，字号给足、行高放松，才不至于空得像没填 */
+    font-size: clamp(11px, min(4.2vh, 3.3vw), 30px);
+    line-height: 1.6;
+    font-weight: var(--w-strong);
+    color: var(--ink);
+    text-wrap: balance;
+  }
+
+  /* 太窄就退成单列 —— 宁可高一点，也不把字挤没 */
+  @media (max-width: 430px) {
+    .combo { grid-template-columns: 1fr; grid-template-rows: repeat(4, 1fr); }
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="combo">
+
+      <!-- ① 时钟 -->
+      <section class="panel p-clock">
+        <div class="time-row">
+          <span id="time">--:--</span><span id="sec">:--</span>
+        </div>
+        <span class="chip chip--strong" id="date">—</span>
+      </section>
+
+      <!-- ② 天气 -->
+      <section class="panel p-weather">
+        <span class="chip chip--strong" id="desc">正在读取…</span>
+        <div class="temp-row"><span id="temp">—</span><span class="deg">°C</span></div>
+        <div class="mini">
+          <span>最高<b id="hi">—</b></span>
+          <span>最低<b id="lo">—</b></span>
+          <span>体感<b id="feel">—</b></span>
+          <span>湿度<b id="hum">—</b></span>
+        </div>
+      </section>
+
+      <!-- ③ 倒计时 -->
+      <section class="panel p-count">
+        <div class="row">
+          <span class="chip chip--ink" id="label">—</span>
+          <span class="chip chip--strong" id="target">—</span>
+        </div>
+        <div class="days-row"><span id="days">—</span><span class="unit">天</span></div>
+        <span class="chip" id="detail">—</span>
+      </section>
+
+      <!-- ④ 今日一句 -->
+      <section class="panel p-quote">
+        <p id="text">—</p>
+        <div class="row">
+          <span class="chip" id="by">—</span>
+          <span class="chip" id="qdate">—</span>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+<script src="../assets/lunar.js"></script>
+<script>
+/* ═══ ① 时钟 ═══════════════════════════════════════════════ */
+(function () {
+  var WEEK = ['周日','周一','周二','周三','周四','周五','周六'];
+  var elTime = document.getElementById('time');
+  var elSec  = document.getElementById('sec');
+  var elDate = document.getElementById('date');
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  var lunarKey = '';
+
+  function tick() {
+    var d = new Date();
+    elTime.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes());
+    elSec.textContent  = ':' + pad(d.getSeconds());
+
+    var key = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+    if (key !== lunarKey) {
+      lunarKey = key;
+      var lunar = '';
+      try { lunar = (typeof lunarText === 'function') ? lunarText(d) : ''; } catch (e) {}
+      elDate.textContent = d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate())
+                         + ' ' + WEEK[d.getDay()] + (lunar ? '　' + lunar : '');
+    }
+  }
+  tick();
+  setInterval(tick, 1000);
+})();
+
+/* ═══ ② 天气（Open-Meteo，免费无 key）══════════════════════ */
+(function () {
+  var CITIES = {
+    dt: { name: '大同', lat: 40.0933, lon: 113.2998 },
+    sz: { name: '苏州', lat: 31.2989, lon: 120.5853 }
+  };
+  var WMO = {
+    0:'晴', 1:'大部晴', 2:'多云', 3:'阴',
+    45:'雾', 48:'雾凇',
+    51:'毛毛雨', 53:'小雨', 55:'细密雨',
+    56:'冻雨', 57:'冻雨',
+    61:'小雨', 63:'中雨', 65:'大雨',
+    66:'冻雨', 67:'强冻雨',
+    71:'小雪', 73:'中雪', 75:'大雪', 77:'雪粒',
+    80:'阵雨', 81:'阵雨', 82:'强阵雨',
+    85:'阵雪', 86:'强阵雪',
+    95:'雷阵雨', 96:'雷暴冰雹', 99:'强雷暴冰雹'
+  };
+
+  var elTemp = document.getElementById('temp');
+  var elDesc = document.getElementById('desc');
+  var elHi   = document.getElementById('hi');
+  var elLo   = document.getElementById('lo');
+  var elFeel = document.getElementById('feel');
+  var elHum  = document.getElementById('hum');
+
+  var wanted = new URLSearchParams(location.search).get('city');
+  var current = (wanted && CITIES[wanted]) ? wanted : 'dt';
+
+  var cache = {};
+  var TTL = 10 * 60 * 1000;
+
+  function fail(msg) {
+    elTemp.textContent = '—';
+    elDesc.textContent = msg || '暂时读不到天气';
+    elHi.textContent = '—'; elLo.textContent = '—';
+    elFeel.textContent = '—'; elHum.textContent = '—';
+  }
+
+  function render(d, city) {
+    var cur = d.current || {};
+    var day = d.daily || {};
+    elTemp.textContent = Math.round(cur.temperature_2m);
+    elDesc.textContent = (WMO[cur.weather_code] || '—') + ' · ' + city.name;
+
+    var hi = Math.round((day.temperature_2m_max || [])[0]);
+    var lo = Math.round((day.temperature_2m_min || [])[0]);
+    elHi.textContent   = isFinite(hi) ? hi + '°' : '—';
+    elLo.textContent   = isFinite(lo) ? lo + '°' : '—';
+    elFeel.textContent = Math.round(cur.apparent_temperature) + '°';
+    elHum.textContent  = Math.round(cur.relative_humidity_2m) + '%';
+  }
+
+  function fetchWeather(key) {
+    var city = CITIES[key];
+    var hit = cache[key];
+    if (hit && Date.now() - hit.at < TTL) { render(hit.data, city); return; }
+
+    elDesc.textContent = '正在读取…';
+
+    var url = 'https://api.open-meteo.com/v1/forecast'
+            + '?latitude=' + city.lat + '&longitude=' + city.lon
+            + '&current=temperature_2m,apparent_temperature,weather_code,relative_humidity_2m'
+            + '&daily=temperature_2m_max,temperature_2m_min'
+            + '&timezone=Asia%2FShanghai&forecast_days=1';
+
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 12000);
+
+    fetch(url, ctrl ? { signal: ctrl.signal } : undefined)
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function (data) {
+        clearTimeout(timer);
+        cache[key] = { at: Date.now(), data: data };
+        render(data, city);
+      })
+      .catch(function () {
+        clearTimeout(timer);
+        fail('暂时读不到天气');
+      });
+  }
+
+  fetchWeather(current);
+  setInterval(function () { fetchWeather(current); }, TTL);
+})();
+
+/* ═══ ③ 倒计时 ═════════════════════════════════════════════ */
+(function () {
+  var q = new URLSearchParams(location.search);
+  var dateStr = q.get('date') || '2027-06-07';
+  var label   = q.get('label') || '高考';
+
+  var m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(dateStr);
+  var target = m
+    ? new Date(+m[1], +m[2] - 1, +m[3], 0, 0, 0)
+    : new Date(2027, 5, 7, 0, 0, 0);
+
+  document.getElementById('label').textContent = label;
+  document.getElementById('target').textContent =
+    target.getFullYear() + '.' + ('0' + (target.getMonth() + 1)).slice(-2) + '.' + ('0' + target.getDate()).slice(-2);
+
+  var elDays = document.getElementById('days');
+  var elDetail = document.getElementById('detail');
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+  function tick() {
+    var now = new Date();
+    var diff = target - now;
+    var past = diff < 0;
+    var abs = Math.abs(diff);
+
+    var d  = Math.floor(abs / 864e5);
+    var h  = Math.floor(abs % 864e5 / 36e5);
+    var mi = Math.floor(abs % 36e5 / 6e4);
+    var s  = Math.floor(abs % 6e4 / 1e3);
+
+    elDays.textContent = past ? '−' + d : d;
+    elDetail.textContent = (past ? '超出 ' : '余 ') + h + ' 时 ' + pad(mi) + ' 分 ' + pad(s) + ' 秒';
+  }
+  tick();
+  setInterval(tick, 1000);
+})();
+
+/* ═══ ④ 今日一句（本地句池，零外部请求）═══════════════════ */
+(function () {
+  var POOL = [
+    ['在隆冬，我终于知道，我身上有一个不可战胜的夏天。', '加缪'],
+    ['重要的不是治愈，而是带着病痛活下去。', '加缪'],
+    ['我反抗，故我们存在。', '加缪'],
+    ['人是被判定为自由的。', '萨特'],
+    ['要爱具体的人，不要爱抽象的人。', '陀思妥耶夫斯基'],
+    ['最要紧的是：首先善良，其次诚实，再其次永远不要相互遗忘。', '陀思妥耶夫斯基'],
+    ['我不是在黑暗中，我是黑暗本身的一部分。', '—'],
+    ['哪有什么胜利可言，挺住意味着一切。', '里尔克'],
+    ['你必须改变你的生活。', '里尔克'],
+    ['你不需要离开房间。只需坐在桌前倾听。', '卡夫卡'],
+    ['我不匆忙，太阳和月亮也不匆忙。', '佩索阿'],
+    ['凡不可说的，应当沉默。', '维特根斯坦'],
+    ['慢的乐趣怎么失传了呢？', '昆德拉'],
+    ['一个人知道自己为什么而活，就可以忍受任何一种生活。', '尼采'],
+    ['我偏爱写诗的荒谬，胜过不写诗的荒谬。', '辛波斯卡'],
+    ['岁月不饶人，我亦未曾饶过岁月。', '木心'],
+    ['我是一个在黑暗中大雪纷飞的人哪。', '木心'],
+    ['所谓无底深渊，下去，也是前程万里。', '木心'],
+    ['生活最好的状态是冷冷清清的风风火火。', '木心'],
+
+    ['把今天过完，就是答案的一部分。', '—'],
+    ['不必一次想清楚一生，先想清楚这一页。', '—'],
+    ['焦虑多半是因为想得太远，而手边的事没做。', '—'],
+    ['你只需要把灯打开，黑暗就不能再占满房间。', '—'],
+    ['沉默不是没话说，是话太重。', '—'],
+    ['慢一点没关系，方向对就行。', '—'],
+    ['真正的自律，是不必跟自己讨价还价。', '—'],
+    ['孤独不是身边没人，是没有一个人听得懂你在说什么。', '—'],
+    ['休息不是浪费，是让齿轮咬得回去。', '—'],
+    ['身体比脑子诚实，累了它先说。', '—'],
+    ['有些日子用来前进，有些日子只用来站住。', '—'],
+    ['难过的时候不要做决定。', '—'],
+    ['把标准立在自己身上，别人的评价就只是参考。', '—'],
+    ['你已经比你以为的走得更远了。', '—'],
+    ['想不通的事先放下，答案常在走路时冒出来。', '—'],
+    ['一天里做成一件事就够了。', '—'],
+    ['不要在深夜评价自己。', '—'],
+    ['不用向任何人证明你在努力。', '—'],
+    ['把小事做对，秩序就回来了。', '—'],
+    ['能安静待一会儿的人，心里有地方。', '—'],
+    ['怕，是因为在乎；怕完了还是要去。', '—'],
+    ['所有的笨拙，都是还没熟的手。', '—'],
+    ['把话说清楚，比把话说漂亮重要。', '—'],
+    ['情绪来了先别动手，它待不了太久。', '—'],
+    ['对一个人最深的照顾，是记得他说过的事。', '—'],
+    ['你不需要被所有人喜欢，只需要被几个人认真对待。', '—'],
+    ['慢慢来，也是一种到。', '—'],
+    ['今天不必赢，今天别断。', '—'],
+    ['手边有热的东西，就不算太冷。', '—'],
+    ['读书是替自己找一些能一起说话的人。', '—']
+  ];
+
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  var now = new Date();
+  var key = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
+
+  var h = key;
+  h = (h ^ 61) ^ (h >>> 16);
+  h = h + (h << 3);
+  h = h ^ (h >>> 4);
+  h = h * 0x27d4eb2d;
+  h = h ^ (h >>> 15);
+
+  var item = POOL[Math.abs(h) % POOL.length];
+  document.getElementById('text').textContent = item[0];
+  document.getElementById('by').textContent = item[1];
+  document.getElementById('qdate').textContent =
+    now.getFullYear() + '.' + pad(now.getMonth() + 1) + '.' + pad(now.getDate());
+})();
+</script>
+</body>
+</html>
