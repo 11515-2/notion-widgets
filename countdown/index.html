@@ -7,13 +7,15 @@
 <link rel="stylesheet" href="../assets/base.css">
 <script>
   (function () {
-    var t = new URLSearchParams(location.search).get('theme');
+    var q = new URLSearchParams(location.search);
+    var t = q.get('theme');
     if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+    if (q.get('solid') === '1') document.documentElement.setAttribute('data-solid', '');
   })();
 </script>
 <style>
-  #days { font-size: clamp(34px, min(26vh, 13vw), 132px); }
-  .unit { font-size: clamp(11px, 2.6vh, 20px); letter-spacing: .1em; }
+  #days { font-size: clamp(40px, min(36vh, 18vw), 190px); }
+  .unit { font-size: clamp(15px, 7vh, 28px); letter-spacing: .1em; }
 </style>
 </head>
 <body>

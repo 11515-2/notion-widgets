@@ -7,13 +7,15 @@
 <link rel="stylesheet" href="../assets/base.css">
 <script>
   (function () {
-    var t = new URLSearchParams(location.search).get('theme');
+    var q = new URLSearchParams(location.search);
+    var t = q.get('theme');
     if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+    if (q.get('solid') === '1') document.documentElement.setAttribute('data-solid', '');
   })();
 </script>
 <style>
   /* 主字号存成变量，秒数取它的一半 —— 用 em 会按 body 16px 算，出不来一半 */
-  .card { --big: clamp(32px, min(25vh, 12.5vw), 128px); }
+  .card { --big: clamp(40px, min(38vh, 19vw), 200px); }
   #time { font-size: var(--big); }
   #sec  { font-size: calc(var(--big) * .5); }
 </style>

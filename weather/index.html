@@ -7,13 +7,15 @@
 <link rel="stylesheet" href="../assets/base.css">
 <script>
   (function () {
-    var t = new URLSearchParams(location.search).get('theme');
+    var q = new URLSearchParams(location.search);
+    var t = q.get('theme');
     if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+    if (q.get('solid') === '1') document.documentElement.setAttribute('data-solid', '');
   })();
 </script>
 <style>
   /* 主字号存变量，单位跟着比例走，不用 em（em 相对 body 的 16px） */
-  .card { --big: clamp(30px, min(21vh, 10.5vw), 112px); }
+  .card { --big: clamp(38px, min(34vh, 17vw), 180px); }
   #temp { font-size: var(--big); }
   .deg  { font-size: calc(var(--big) * .34); }
 
@@ -39,7 +41,7 @@
     align-items: baseline;
     justify-content: space-between;
     gap: clamp(7px, 1.5vw, 13px);   /* 标签与数字之间的最小间隙 */
-    font-size: clamp(10px, 2vh, 13px);
+    font-size: clamp(13px, 6.5vh, 17px);
     color: var(--ink-2);
     letter-spacing: .02em;
     white-space: nowrap;

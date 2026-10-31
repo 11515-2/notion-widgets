@@ -7,14 +7,16 @@
 <link rel="stylesheet" href="../assets/base.css">
 <script>
   (function () {
-    var t = new URLSearchParams(location.search).get('theme');
+    var q = new URLSearchParams(location.search);
+    var t = q.get('theme');
     if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+    if (q.get('solid') === '1') document.documentElement.setAttribute('data-solid', '');
   })();
 </script>
 <style>
   .quote-block {
     width: 100%;
-    padding: clamp(11px, 2.8vh, 24px) clamp(13px, 2.8vw, 24px);
+    padding: clamp(12px, 3vh, 26px) clamp(14px, 3vw, 26px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -23,8 +25,8 @@
   #text {
     margin: 0;
     text-align: center;
-    font-size: clamp(12px, min(3.4vh, 2.2vw), 24px);
-    line-height: 1.6;
+    font-size: clamp(14px, min(4.6vh, 3vw), 34px);
+    line-height: 1.55;
     font-weight: var(--w-strong);
     letter-spacing: .01em;
     color: var(--ink);
