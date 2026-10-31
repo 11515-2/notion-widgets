@@ -20,7 +20,7 @@
   <div class="card">
     <div class="top">
       <span class="chip">Local time</span>
-      <span class="chip" id="sec">:--</span>
+      <span class="chip" id="sec">-- 秒</span>
     </div>
 
     <div class="main">
@@ -59,7 +59,7 @@
   function tick() {
     var d = new Date();
     elTime.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes());
-    elSec.textContent  = ':' + pad(d.getSeconds());
+    elSec.textContent  = pad(d.getSeconds()) + ' 秒';
     elDate.textContent = d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate())
                        + ' ' + WEEK[d.getDay()];
     elWeek.textContent = '第 ' + isoWeek(d) + ' 周';
