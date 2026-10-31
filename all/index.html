@@ -14,170 +14,215 @@
   })();
 </script>
 <style>
-  /* ═══ 四格布局 ═══════════════════════════════════════════════
-     2×2 网格。间距走 vh：太小四块粘成一坨，太大又散；
-     1.8vh 在 400~700px 高度区间落在 7~13px，刚好看得出是四块又不是四座岛。 */
-  .card { padding: clamp(10px, 2vh, 18px); }
+  /* ═══ 整合式编排 ═══════════════════════════════════════════════════
+     不分格子。整块画布切成三条横带，元素按信息流排进带里：
 
-  .combo {
+       ① 带  时间（锚点） · 日期 · 农历 ………………… 天气状况 · 温度 · 四项数据
+       ② 带  倒计时标签 · 目标日期 …………… 天数 …………… 精确到秒
+       ③ 带  今日一句 ……………………………………… 出处 · 日期
+
+     三条带之间只压一道 rgba 细线分隔，不用色块切割 ——
+     所以读起来是一条完整的信息流，不是四张并排的贴纸。
+     每带内部靠 justify-content: space-between 把元素拉到头，
+     中间那点留白就是它们的连接组织。 */
+
+  .card { padding: clamp(10px, 2vh, 20px) clamp(12px, 2.4vw, 26px); }
+
+  .stage {
     width: 100%;
     height: 100%;
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    gap: clamp(8px, 1.8vh, 16px);
+    grid-template-rows: auto auto auto;
+    align-content: center;
   }
 
-  .panel {
+  .band {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: clamp(10px, 2vw, 26px);
+    padding: clamp(9px, 1.8vh, 17px) 0;
     min-width: 0;
-    min-height: 0;
+  }
+  .band + .band { border-top: 1px solid var(--line); }
+
+  /* 带内成组的小单元：竖着叠 */
+  .cluster {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: clamp(4px, 1.1vh, 10px);
-    padding: clamp(8px, 1.9vh, 16px) clamp(9px, 1.8vw, 16px);
-    background: var(--surface);
-    border-radius: var(--r-md);
-    overflow: hidden;
+    gap: clamp(3px, .8vh, 7px);
+    min-width: 0;
   }
 
-  /* 面板内的小块再深/亮一级 —— 有层次才不像贴纸，也才分得清主次 */
   .chip {
     background: var(--surface-2);
-    font-size: clamp(9px, min(3.4vh, 2.4vw), 16px);
-    padding: clamp(3px, .8vh, 6px) clamp(7px, 1.3vw, 12px);
+    font-size: clamp(9px, min(3vh, 2.2vw), 15px);
+    padding: clamp(3px, .75vh, 6px) clamp(7px, 1.2vw, 12px);
+    align-self: flex-start;
   }
 
-  .row {
-    gap: clamp(5px, 1.1vw, 10px);
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  /* ─── ① 时钟 ─────────────────────────────────────────── */
+  /* ─── ① 带左：时钟 ──────────────────────────────────── */
   .time-row {
     display: flex;
     align-items: baseline;
-    gap: clamp(2px, .5vw, 5px);
-    line-height: 1;
+    gap: clamp(2px, .5vw, 6px);
+    line-height: .92;
     color: var(--ink);
     font-weight: var(--w-strong);
-    letter-spacing: -.02em;
+    letter-spacing: -.03em;
   }
-  .p-clock #time { font-size: clamp(22px, min(13vh, 9vw), 120px); }
-  .p-clock #sec  { font-size: clamp(11px, min(6.5vh, 4.5vw), 60px); color: var(--ink-2); }
+  #time { font-size: clamp(24px, min(15vh, 9.5vw), 132px); }
+  #sec  { font-size: clamp(12px, min(7.5vh, 4.75vw), 66px); color: var(--ink-2); }
 
-  /* ─── ② 天气 ─────────────────────────────────────────── */
+  /* ─── ① 带右：天气 ──────────────────────────────────── */
+  .weather {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: clamp(3px, .8vh, 7px);
+    min-width: 0;
+  }
+  .weather-head {
+    display: flex;
+    align-items: baseline;
+    gap: clamp(6px, 1.4vw, 14px);
+  }
+  .weather-head .chip { align-self: center; }
+
   .temp-row {
     display: flex;
     align-items: baseline;
-    line-height: 1;
+    line-height: .92;
     color: var(--ink);
     font-weight: var(--w-strong);
+    letter-spacing: -.03em;
   }
-  .p-weather #temp { font-size: clamp(20px, min(13vh, 9vw), 112px); letter-spacing: -.02em; }
-  .p-weather .deg  {
-    font-size: clamp(9px, min(4.4vh, 3vw), 36px);
+  #temp { font-size: clamp(18px, min(11vh, 6.6vw), 92px); }
+  .deg  {
+    font-size: clamp(8px, min(3.6vh, 2.2vw), 32px);
     color: var(--ink-2);
-    margin-left: .12em;
+    margin-left: .1em;
   }
 
-  /* 四项数据：两列等宽（auto），标签贴左、数字贴右，跟单组件那版一个规格 */
+  /* 四项数据排成一条横线，段间用极淡竖线断开 —— 比四个小方块安静得多 */
   .mini {
-    display: grid;
-    grid-template-columns: auto auto;
-    gap: clamp(3px, .9vh, 7px) clamp(9px, 2.2vw, 20px);
-    justify-content: center;
-  }
-  .mini span {
     display: flex;
     align-items: baseline;
-    justify-content: space-between;
-    gap: clamp(5px, 1.2vw, 10px);
-    font-size: clamp(9px, min(3.1vh, 2.15vw), 15px);
+    gap: clamp(7px, 1.5vw, 16px);
+    font-size: clamp(9px, min(2.75vh, 1.95vw), 14px);
     color: var(--ink-2);
     letter-spacing: .02em;
     white-space: nowrap;
   }
+  .mini span { display: flex; align-items: baseline; gap: .34em; }
+  .mini span + span {
+    border-left: 1px solid var(--line);
+    padding-left: clamp(7px, 1.5vw, 16px);
+  }
   .mini b { color: var(--ink); font-weight: var(--w-strong); }
 
-  /* ─── ③ 倒计时 ───────────────────────────────────────── */
+  /* ─── ② 带：倒计时 ──────────────────────────────────── */
+  .count-left {
+    display: flex;
+    align-items: baseline;
+    gap: clamp(6px, 1.2vw, 13px);
+    min-width: 0;
+  }
+  .count-left .chip { align-self: center; }
+
   .days-row {
     display: flex;
     align-items: baseline;
-    gap: clamp(3px, .7vw, 7px);
-    line-height: 1;
+    gap: clamp(3px, .7vw, 8px);
+    line-height: .92;
     color: var(--ink);
     font-weight: var(--w-strong);
+    letter-spacing: -.03em;
   }
-  .p-count #days { font-size: clamp(22px, min(13vh, 9vw), 112px); letter-spacing: -.02em; }
-  .p-count .unit {
-    font-size: clamp(10px, min(4.6vh, 3vw), 28px);
+  #days { font-size: clamp(20px, min(11.5vh, 7vw), 96px); }
+  .unit {
+    font-size: clamp(10px, min(4vh, 2.4vw), 26px);
     color: var(--ink-2);
     letter-spacing: .08em;
   }
 
-  /* ─── ④ 今日一句 ─────────────────────────────────────── */
-  .p-quote #text {
+  /* ─── ③ 带：引文 ────────────────────────────────────── */
+  #text {
     margin: 0;
-    text-align: center;
-    /* 这一格信息量只有一句话，字号给足、行高放松，才不至于空得像没填 */
-    font-size: clamp(11px, min(4.2vh, 3.3vw), 30px);
-    line-height: 1.6;
+    font-size: clamp(10px, min(3.7vh, 2.75vw), 25px);
+    line-height: 1.5;
     font-weight: var(--w-strong);
     color: var(--ink);
-    text-wrap: balance;
+    min-width: 0;
+    text-wrap: pretty;
   }
+  .by-row {
+    display: flex;
+    align-items: baseline;
+    gap: clamp(5px, 1vw, 10px);
+    flex-shrink: 0;
+    font-size: clamp(9px, min(2.5vh, 1.75vw), 14px);
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+  .by-row b { color: var(--ink); font-weight: var(--w-strong); }
 
-  /* 太窄就退成单列 —— 宁可高一点，也不把字挤没 */
-  @media (max-width: 430px) {
-    .combo { grid-template-columns: 1fr; grid-template-rows: repeat(4, 1fr); }
+  /* 窄了就每条带自己换行 —— 元素一个不丢，也不硬挤 */
+  @media (max-width: 480px) {
+    .band { flex-wrap: wrap; align-items: flex-start; }
+    .weather { align-items: flex-start; }
+    #time { font-size: clamp(24px, 11vw, 92px); }
+    #sec  { font-size: clamp(12px, 5.5vw, 46px); }
+    #temp { font-size: clamp(18px, 8vw, 66px); }
+    #days { font-size: clamp(20px, 9vw, 78px); }
   }
 </style>
 </head>
 <body>
   <div class="card">
-    <div class="combo">
+    <div class="stage">
 
-      <!-- ① 时钟 -->
-      <section class="panel p-clock">
-        <div class="time-row">
-          <span id="time">--:--</span><span id="sec">:--</span>
+      <!-- ① 时间 · 日期 · 天气 -->
+      <div class="band">
+        <div class="cluster">
+          <div class="time-row">
+            <span id="time">--:--</span><span id="sec">:--</span>
+          </div>
+          <span class="chip chip--strong" id="date">—</span>
         </div>
-        <span class="chip chip--strong" id="date">—</span>
-      </section>
 
-      <!-- ② 天气 -->
-      <section class="panel p-weather">
-        <span class="chip chip--strong" id="desc">正在读取…</span>
-        <div class="temp-row"><span id="temp">—</span><span class="deg">°C</span></div>
-        <div class="mini">
-          <span>最高<b id="hi">—</b></span>
-          <span>最低<b id="lo">—</b></span>
-          <span>体感<b id="feel">—</b></span>
-          <span>湿度<b id="hum">—</b></span>
+        <div class="weather">
+          <div class="weather-head">
+            <span class="chip chip--strong" id="desc">正在读取…</span>
+            <div class="temp-row"><span id="temp">—</span><span class="deg">°C</span></div>
+          </div>
+          <div class="mini">
+            <span>最高<b id="hi">—</b></span>
+            <span>最低<b id="lo">—</b></span>
+            <span>体感<b id="feel">—</b></span>
+            <span>湿度<b id="hum">—</b></span>
+          </div>
         </div>
-      </section>
+      </div>
 
-      <!-- ③ 倒计时 -->
-      <section class="panel p-count">
-        <div class="row">
-          <span class="chip chip--ink" id="label">—</span>
-          <span class="chip chip--strong" id="target">—</span>
+      <!-- ② 倒计时 -->
+      <div class="band">
+        <div class="count-left">
+          <span class="chip chip--strong" id="label">—</span>
+          <span class="chip" id="target">—</span>
         </div>
         <div class="days-row"><span id="days">—</span><span class="unit">天</span></div>
         <span class="chip" id="detail">—</span>
-      </section>
+      </div>
 
-      <!-- ④ 今日一句 -->
-      <section class="panel p-quote">
+      <!-- ③ 今日一句 -->
+      <div class="band">
         <p id="text">—</p>
-        <div class="row">
-          <span class="chip" id="by">—</span>
-          <span class="chip" id="qdate">—</span>
+        <div class="by-row">
+          <b id="by">—</b>
+          <span id="qdate">—</span>
         </div>
-      </section>
+      </div>
 
     </div>
   </div>
