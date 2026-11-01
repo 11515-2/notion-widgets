@@ -163,14 +163,16 @@
       gap: clamp(0px, .3vmin, 2px);
     }
 
-    /* 时间块最大，字号给它放到最大；其余按格子尺寸退一档 */
-    #time { font-size: clamp(20px, min(21vmin, 14vw), 150px); }
-    #sec  { font-size: clamp(11px, min(10vmin, 6.6vw), 72px); }
-    #temp { font-size: clamp(13px, min(10vmin, 7vw), 76px); }
-    #days { font-size: clamp(15px, min(11vmin, 7.6vw), 84px); }
-    .unit, .deg { font-size: clamp(8px, min(4.2vmin, 3.2vw), 26px); }
-    .sub  { font-size: clamp(7px, min(3.2vmin, 2.5vw), 16px); }
-    #text { font-size: clamp(9px, min(4.4vmin, 3.4vw), 30px); }
+    /* 时间块是主角但要收一档：原来 21vmin 在 710×393 跑出 82.5px，
+       跟右边温度 39.3 / 天数 43.2 差了 2.1 倍，看着头重脚轻。
+       收到 15.5vmin ≈ 61px，跟天数 47 / 温度 43 拉开 1.4 倍就够当主角了。 */
+    #time { font-size: clamp(18px, min(15.5vmin, 10.5vw), 112px); }
+    #sec  { font-size: clamp(10px, min(7.5vmin, 5vw), 54px); }
+    #temp { font-size: clamp(13px, min(11vmin, 7.6vw), 80px); }
+    #days { font-size: clamp(15px, min(12vmin, 8.3vw), 86px); }
+    .unit, .deg { font-size: clamp(8px, min(4.6vmin, 3.4vw), 28px); }
+    .sub  { font-size: clamp(7px, min(3.7vmin, 2.8vw), 17px); }
+    #text { font-size: clamp(9px, min(4.8vmin, 3.6vw), 32px); }
   }
 
   /* ─── 扁容器：四块横排一行，各自按比例分宽度 ─────────────
