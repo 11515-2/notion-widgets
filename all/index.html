@@ -220,6 +220,7 @@
           <div class="num"><span id="time">--:--</span><span id="sec">:--</span></div>
           <span id="date" class="sub sub--main">—</span>
           <span id="lunar" class="sub">—</span>
+          <span id="festival" class="sub">—</span>
         </div>
 
         <div class="blk blk--wx">
@@ -260,8 +261,37 @@
   var elSec   = document.getElementById('sec');
   var elDate  = document.getElementById('date');
   var elLunar = document.getElementById('lunar');
+  var elFest  = document.getElementById('festival');
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
-  var lunarKey = '';
+
+  // ── 只看这五个重要节日：公历三个、农历两个 ──────────────
+  var FEST = [
+    { type: 'solar', m: 10, d: 1,  name: '国庆'   },
+    { type: 'solar', m: 10, d: 31, name: '万圣节' },
+    { type: 'solar', m: 12, d: 25, name: '圣诞'   },
+    { type: 'lunar', m: 8,  d: 15, name: '中秋'   },
+    { type: 'lunar', m: 1,  d: 1,  name: '春节'   }
+  ];
+
+  /* 从今天起往后找最近的一个节日；农历节日靠 toLunar 逐日试出来 */
+  function nextFestival(from) {
+    var y = from.getFullYear(), mo = from.getMonth(), da = from.getDate();
+    for (var i = 0; i <= 420; i++) {
+      var d = new Date(y, mo, da + i);
+      for (var k = 0; k < FEST.length; k++) {
+        var f = FEST[k];
+        if (f.type === 'solar') {
+          if (d.getMonth() + 1 === f.m && d.getDate() === f.d) return { name: f.name, days: i };
+        } else if (typeof toLunar === 'function') {
+          var l = toLunar(d);
+          if (!l.leap && l.m === f.m && l.d === f.d) return { name: f.name, days: i };
+        }
+      }
+    }
+    return null;
+  }
+
+  var lastKey = '';
 
   function tick() {
     var d = new Date();
@@ -269,13 +299,24 @@
     elSec.textContent  = ':' + pad(d.getSeconds());
 
     var key = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
-    if (key !== lunarKey) {
-      lunarKey = key;
+    if (key !== lastKey) {
+      lastKey = key;
       var lunar = '';
       try { lunar = (typeof lunarText === 'function') ? lunarText(d) : ''; } catch (e) {}
       elDate.textContent  = d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate())
                           + ' ' + WEEK[d.getDay()];
       elLunar.textContent = lunar || ' ';
+
+      // 距下一个重要节日（一天只算一次）
+      if (elFest) {
+        try {
+          var f = nextFestival(d);
+          elFest.textContent = !f ? ' '
+            : f.days === 0 ? '今天 · ' + f.name
+            : f.days === 1 ? '明天 · ' + f.name
+            : '距' + f.name + ' ' + f.days + ' 天';
+        } catch (e2) { elFest.textContent = ' '; }
+      }
     }
   }
   tick();
