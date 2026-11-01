@@ -67,6 +67,8 @@
     align-items: center;
     justify-content: space-between;
     gap: clamp(6px, 2vmin, 16px);
+    /* 加了生命线后这块被压到 57px，横排内容装不下会竖溢，给个下限兜住 */
+    min-height: clamp(48px, 15vmin, 76px);
   }
   .count-right {
     display: flex;
@@ -76,6 +78,56 @@
     gap: clamp(0px, .35vmin, 3px);
     text-align: right;
     min-width: 0;
+  }
+
+  /* ─── 生命线：四行进度（本日/本周/本月/本年）──────────── */
+  .life-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: clamp(3px, 1.1vmin, 11px);
+    min-width: 0;
+  }
+
+  .life-lbl {
+    font-size: clamp(7px, min(2.9vh, 3.2vw), 20px);
+    font-weight: var(--w-body);
+    color: var(--ink-2);
+    letter-spacing: .04em;
+    white-space: nowrap;
+    line-height: 1;
+  }
+
+  /* 轨道浓度 45%：跟单独组件一致，浅色深色都到 WCAG 3:1 */
+  .life-track {
+    position: relative;
+    height: clamp(3px, min(1.6vmin, 1vw), 13px);
+    background: var(--line-strong);
+    background: color-mix(in srgb, var(--ink) 45%, transparent);
+    border-radius: 999px;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .life-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 0;
+    min-width: 2px;           /* 极低百分比也要看得见 */
+    background: var(--ink);
+    border-radius: 999px;
+    transition: width .9s linear;
+  }
+
+  .life-pct {
+    font-size: clamp(7px, min(3.4vh, 3.8vw), 24px);
+    font-weight: var(--w-strong);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.01em;
+    color: var(--ink);
+    text-align: right;
+    min-width: 3.4em;         /* 100.0% 也要占同样宽，数字不抖 */
+    line-height: 1;
   }
 
   /* ─── 字级：主数字一套，其余全挂 .sub ──────────────────── */
@@ -127,19 +179,22 @@
   }
   #by { color: var(--ink-2); }
 
-  /* ─── 横向偏方（6:5 ~ 22:10）：一大三小，不是四格均分 ───
+  /* ─── 横向偏方（3/2 ~ 22/10）：时间块当主角 + 中间上下两块 + 最右生命线 ───
      四等分最呆板 —— 四块一样大、一样重，眼睛不知道先看哪儿。
-     改成时间块跨两行当主角（占 1.45 倍宽、两行高），
-     天气和倒计时在右侧上下排，引文收底通栏。 */
-  @media (min-aspect-ratio: 6/5) and (max-aspect-ratio: 22/10) {
+     所以时间块跨两行占 1.75 倍宽，天气和倒计时在中间上下排，
+     生命线在最右单独一列（也跨两行），引文收底通栏。
+
+     下限从 6/5 提到 3/2：五块挤在 600×420 这种偏方的框里，中列只剩 137 宽，
+     生命线的进度条会被压到 40 多像素。那种比例让它走竖排档更好看。 */
+  @media (min-aspect-ratio: 3/2) and (max-aspect-ratio: 22/10) {
     .stage {
       display: grid;
-      grid-template-columns: 1.45fr 1fr;
+      grid-template-columns: 1.75fr 1fr 1fr;
       grid-template-rows: 1fr 1fr auto;
       grid-template-areas:
-        "time  wx"
-        "time  count"
-        "quote quote";
+        "time  wx     life"
+        "time  count  life"
+        "quote quote  quote";
       gap: clamp(4px, 1.3vmin, 13px);
     }
     .pair { display: contents; }
@@ -147,7 +202,14 @@
     .blk--time  { grid-area: time; }
     .blk--wx    { grid-area: wx; }
     .blk--count { grid-area: count; }
+    .blk--life  { grid-area: life; justify-content: center; gap: clamp(2px, 1.1vmin, 9px); }
     .blk--quote { grid-area: quote; }
+
+    /* 中列只剩 159~204 宽，「高考 · 2027.06.07」这 15 个字放不下，
+       绝对日期在这个尺寸里没什么用（上面已经有 217 天了），窄档直接藏掉，
+       只留标签和剩余时分秒 */
+    .blk--count .sep,
+    .blk--count #target { display: none; }
 
     /* 倒计时块在这个档只有 280 宽，塞左右两组会断开一大段空隙 ——
        改成竖排左对齐，跟上面天气块同一个呼吸节奏 */
@@ -163,16 +225,17 @@
       gap: clamp(0px, .3vmin, 2px);
     }
 
-    /* 时间块是主角但要收一档：原来 21vmin 在 710×393 跑出 82.5px，
-       跟右边温度 39.3 / 天数 43.2 差了 2.1 倍，看着头重脚轻。
-       收到 15.5vmin ≈ 61px，跟天数 47 / 温度 43 拉开 1.4 倍就够当主角了。 */
-    #time { font-size: clamp(18px, min(15.5vmin, 10.5vw), 112px); }
-    #sec  { font-size: clamp(10px, min(7.5vmin, 5vw), 54px); }
-    #temp { font-size: clamp(13px, min(11vmin, 7.6vw), 80px); }
-    #days { font-size: clamp(15px, min(12vmin, 8.3vw), 86px); }
-    .unit, .deg { font-size: clamp(8px, min(4.6vmin, 3.4vw), 28px); }
-    .sub  { font-size: clamp(7px, min(3.7vmin, 2.8vw), 17px); }
-    #text { font-size: clamp(9px, min(4.8vmin, 3.6vw), 32px); }
+    /* 时间块是主角。三列后它占 1.75 份，710×393 时约 313 宽、内宽 297，
+       8 个字符（13:38 + :11）按等宽 0.617em 算，字号上限 ≈ 297/4.94 ≈ 60px，
+       取 13vmin/8vw 刚好卡在里面，比温度天数拉开一档。 */
+    #time { font-size: clamp(15px, min(13vmin, 8vw), 78px); }
+    #sec  { font-size: clamp(9px,  min(6.5vmin, 4vw), 39px); }
+    #temp { font-size: clamp(12px, min(9vmin, 6vw), 62px); }
+    #days { font-size: clamp(13px, min(9.5vmin, 6.4vw), 66px); }
+    .unit, .deg { font-size: clamp(8px, min(4vmin, 2.8vw), 22px); }
+    /* 「余 10 时 22 分 49 秒」12 个字，得压到中列内宽以内 */
+    .sub  { font-size: clamp(6px, min(2.85vmin, 1.85vw), 12px); }
+    #text { font-size: clamp(9px, min(4.2vmin, 3vw), 26px); }
   }
 
   /* ─── 扁容器：四块横排一行，各自按比例分宽度 ─────────────
@@ -188,6 +251,7 @@
     .blk--time  { flex: 2.2 1 0; }
     .blk--wx    { flex: 1.25 1 0; }
     .blk--count { flex: 1.7 1 0; flex-direction: column; align-items: flex-start; justify-content: center; }
+    .blk--life  { flex: 1.45 1 0; justify-content: center; gap: clamp(1px, .8vmin, 6px); }
     .blk--quote { flex: 1.9 1 0; }
 
     .count-right { align-items: flex-start; text-align: left; }
@@ -238,9 +302,17 @@
       <div class="blk blk--count">
         <div class="num"><span id="days">—</span><span class="unit">天</span></div>
         <div class="count-right">
-          <span class="sub sub--main"><span id="label">—</span> · <span id="target">—</span></span>
+          <span class="sub sub--main"><span id="label">—</span><span class="sep"> · </span><span id="target">—</span></span>
           <span id="detail" class="sub">—</span>
         </div>
+      </div>
+
+      <!-- 生命线：本日 / 本周 / 本月 / 本年 -->
+      <div class="blk blk--life">
+        <div class="life-row"><span class="life-lbl">本日</span><span class="life-track"><i class="life-fill" id="lf0"></i></span><span class="life-pct" id="lp0">—</span></div>
+        <div class="life-row"><span class="life-lbl">本周</span><span class="life-track"><i class="life-fill" id="lf1"></i></span><span class="life-pct" id="lp1">—</span></div>
+        <div class="life-row"><span class="life-lbl">本月</span><span class="life-track"><i class="life-fill" id="lf2"></i></span><span class="life-pct" id="lp2">—</span></div>
+        <div class="life-row"><span class="life-lbl">本年</span><span class="life-track"><i class="life-fill" id="lf3"></i></span><span class="life-pct" id="lp3">—</span></div>
       </div>
 
       <!-- 底部：今日一句 -->
@@ -617,6 +689,47 @@
 
   render();
   setInterval(render, 15000);
+})();
+
+/* ═══ ⑤ 生命线：本日 / 本周 / 本月 / 本年 已过进度 ══════════ */
+(function () {
+  var fills = [
+    document.getElementById('lf0'), document.getElementById('lf1'),
+    document.getElementById('lf2'), document.getElementById('lf3')
+  ];
+  var pcts = [
+    document.getElementById('lp0'), document.getElementById('lp1'),
+    document.getElementById('lp2'), document.getElementById('lp3')
+  ];
+  if (!fills[0]) return;
+
+  /* 四段区间都用 Date 构造，月长闰年交给浏览器，不手算毫秒 */
+  function spans(now) {
+    var y = now.getFullYear(), m = now.getMonth(), d = now.getDate();
+    var dayStart = new Date(y, m, d), dayEnd = new Date(y, m, d + 1);
+    var dow = (dayStart.getDay() + 6) % 7;            // 周一=0
+    var weekStart = new Date(y, m, d - dow), weekEnd = new Date(y, m, d - dow + 7);
+    var monthStart = new Date(y, m, 1), monthEnd = new Date(y, m + 1, 1);
+    var yearStart = new Date(y, 0, 1), yearEnd = new Date(y + 1, 0, 1);
+    return [[dayStart, dayEnd], [weekStart, weekEnd],
+            [monthStart, monthEnd], [yearStart, yearEnd]];
+  }
+
+  function tickLife() {
+    var now = new Date(), t = now.getTime(), s = spans(now);
+    for (var i = 0; i < 4; i++) {
+      var total = s[i][1] - s[i][0];
+      if (!(total > 0)) continue;
+      var r = (t - s[i][0]) / total;
+      r = r < 0 ? 0 : r > 1 ? 1 : r;
+      var p = r * 100;
+      fills[i].style.width = p.toFixed(2) + '%';
+      pcts[i].textContent = (p >= 99.995 ? '100' : p.toFixed(1)) + '%';
+    }
+  }
+
+  tickLife();
+  setInterval(tickLife, 1000);
 })();
 </script>
 </body>
