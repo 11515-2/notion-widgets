@@ -130,6 +130,9 @@
     line-height: 1;
   }
 
+  /* 四行均匀排开：块有多高就把四行分多开，别挤在中间留一大片空 */
+  .blk--life { justify-content: space-between; }
+
   /* ─── 字级：主数字一套，其余全挂 .sub ──────────────────── */
   .num {
     display: flex;
@@ -202,7 +205,7 @@
     .blk--time  { grid-area: time; }
     .blk--wx    { grid-area: wx; }
     .blk--count { grid-area: count; }
-    .blk--life  { grid-area: life; justify-content: center; gap: clamp(2px, 1.1vmin, 9px); }
+    .blk--life  { grid-area: life; gap: clamp(2px, 1.1vmin, 9px); }
     .blk--quote { grid-area: quote; }
 
     /* 中列只剩 159~204 宽，「高考 · 2027.06.07」这 15 个字放不下，
@@ -251,7 +254,7 @@
     .blk--time  { flex: 2.2 1 0; }
     .blk--wx    { flex: 1.25 1 0; }
     .blk--count { flex: 1.7 1 0; flex-direction: column; align-items: flex-start; justify-content: center; }
-    .blk--life  { flex: 1.45 1 0; justify-content: center; gap: clamp(1px, .8vmin, 6px); }
+    .blk--life  { flex: 1.45 1 0; gap: clamp(1px, .8vmin, 6px); }
     .blk--quote { flex: 1.9 1 0; }
 
     .count-right { align-items: flex-start; text-align: left; }
