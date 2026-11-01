@@ -5,21 +5,18 @@
    —— 无外部依赖、无任何密钥
    ============================================================ */
 
-/* 字体：本地托管子集，只含组件实际用到的 593 个字符，
-   两个文件合计约 288KB。来源 Maple Mono v7.9，OFL-1.1，
-   许可全文见 assets/fonts/OFL.txt */
-@font-face {
-  font-family: "Maple Mono NF CN Web";
-  src: url("./fonts/maple-regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
+/* 字体：本地托管，单文件覆盖 400–700 全字重。
+   收录 GB2312 全部 6763 个汉字 + 组件自身用字，共 6891 个码位。
+   为什么收到这么宽：诗句来自今日诗词接口，字符不可预知。当初按组件自己写死的
+   文字只收了 898 个码位，结果 10 句诗里 10 句都有生僻字（兮/殇/毂/綦…）回落到
+   系统字体，同一行字的粗细和字形对不上。
+   组件实际只用 600 和 700 两个字重，600 按 CSS 规范就近匹配到 700 那份，
+   所以 regular 从来不会被请求，直接砍掉，省下的体积全用来扩容。
+   来源 Maple Mono v7.9，OFL-1.1，许可全文见 assets/fonts/OFL.txt */
 @font-face {
   font-family: "Maple Mono NF CN Web";
   src: url("./fonts/maple-bold.woff2") format("woff2");
-  font-weight: 700;
+  font-weight: 400 700;
   font-style: normal;
   font-display: swap;
 }
