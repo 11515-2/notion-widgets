@@ -221,7 +221,12 @@
       })
       .catch(function () {
         clearTimeout(timer);
-        renderLocal(slot);      // 接口挂了用本地句池兜底
+        renderLocal(slot);      // 接口挂了先兜底，界面不能空
+        /* 但兜底不等于认输：这一格还没结束就再试一次。
+           否则一次网络抖动 / 偶发 403 会把本地句锁死半小时。 */
+        setTimeout(function () {
+          if (curSlot === slot) { curSlot = -1; render(); }
+        }, 90000);
       });
   }
 
