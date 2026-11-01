@@ -149,10 +149,18 @@
     .blk--count { grid-area: count; }
     .blk--quote { grid-area: quote; }
 
+    /* 倒计时块在这个档只有 280 宽，塞左右两组会断开一大段空隙 ——
+       改成竖排左对齐，跟上面天气块同一个呼吸节奏 */
     .blk--count {
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: clamp(1px, .5vmin, 5px);
+    }
+    .count-right {
+      align-items: flex-start;
+      text-align: left;
+      gap: clamp(0px, .3vmin, 2px);
     }
 
     /* 时间块最大，字号给它放到最大；其余按格子尺寸退一档 */
