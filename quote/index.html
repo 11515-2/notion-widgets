@@ -102,9 +102,16 @@
     ['读书是替自己找一些能一起说话的人。', '—']
   ];
 
-  /* 每半小时换一句：时间切成 30 分钟一格，格号做哈希。
-     同一格内稳定，跨格才换；每 15 秒对表，换格立刻刷新。 */
+  /* 每半小时换一句。诗句来自「今日诗词」开放接口：
+       GET https://v1.jinrishici.com/all.json
+       返回 { content, author, origin, category }，免费、无需 key、
+       响应头 access-control-allow-origin: * —— 浏览器能直连。
+     接口万一挂了就落回下面这个本地句池，界面永远不会空。
+
+     刷新节奏：时间切成 30 分钟一格，跨格才重新取；
+     每 15 秒对一次表，到点立刻换，不靠 setInterval(30min) 慢慢漂。 */
   var SLOT_MS = 30 * 60 * 1000;
+  var POEM_API = 'https://v1.jinrishici.com/all.json';
 
   function slotHash(slot) {
     var h = slot;
@@ -120,13 +127,38 @@
   var elBy   = document.getElementById('by');
   var curSlot = -1;
 
+  function renderLocal(slot) {
+    var item = POOL[slotHash(slot)];
+    elText.textContent = item[0];
+    elBy.textContent = item[1];
+  }
+
   function render() {
     var slot = Math.floor(Date.now() / SLOT_MS);
     if (slot === curSlot) return;
     curSlot = slot;
-    var item = POOL[slotHash(slot)];
-    elText.textContent = item[0];
-    elBy.textContent = item[1];
+
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 8000);
+
+    fetch(POEM_API, ctrl ? { signal: ctrl.signal, cache: 'no-store' } : { cache: 'no-store' })
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function (d) {
+        clearTimeout(timer);
+        if (!d || !d.content) throw new Error('empty');
+        elText.textContent = d.content;
+        var meta = [];
+        if (d.author) meta.push(d.author);
+        if (d.origin) meta.push(d.origin);
+        elBy.textContent = meta.length ? meta.join(' · ') : '—';
+      })
+      .catch(function () {
+        clearTimeout(timer);
+        renderLocal(slot);      // 接口挂了用本地句池兜底
+      });
   }
 
   render();
