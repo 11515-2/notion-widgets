@@ -1,0 +1,29 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0">
+<iframe id="f" src="./all/?theme=dark" style="width:710px;height:393px;border:0"></iframe>
+<pre id="out">pending</pre>
+<script>
+window.addEventListener('load', function () {
+  setTimeout(function () {
+    var d = document.getElementById('f').contentDocument;
+    var L = [];
+    var st = d.querySelector('.stage');
+    L.push('stage display=' + getComputedStyle(st).display);
+    var blks = d.querySelectorAll('.blk');
+    var names = ['时间','天气','倒计时','引文'];
+    for (var i = 0; i < blks.length; i++) {
+      var b = blks[i], r = b.getBoundingClientRect();
+      L.push('  ' + names[i] + ' x=' + Math.round(r.left) + '..' + Math.round(r.right)
+        + ' y=' + Math.round(r.top) + '..' + Math.round(r.bottom)
+        + '  ' + Math.round(r.width) + 'x' + Math.round(r.height)
+        + (b.scrollWidth > b.clientWidth + 1 ? ' 横溢!' : '')
+        + (b.scrollHeight > b.clientHeight + 1 ? ' 竖溢!' : ''));
+    }
+    var sz = function (s) { var e = d.querySelector(s); return e ? parseFloat(getComputedStyle(e).fontSize).toFixed(1) : 'NA'; };
+    L.push('字号 时间=' + sz('#time') + ' 温度=' + sz('#temp') + ' 天数=' + sz('#days')
+      + ' 引文=' + sz('#text') + ' 小字=' + sz('.sub'));
+    L.push('文本: ' + ['time','date','temp','days','detail','text'].map(function(id){
+      var e=d.querySelector('#'+id); return id+'='+(e?e.textContent:'缺');}).join(' | '));
+    document.getElementById('out').textContent = L.join('\n');
+  }, 3200);
+});
+</script></body></html>
