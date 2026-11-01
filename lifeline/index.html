@@ -58,13 +58,14 @@
     line-height: 1;
   }
 
-  /* 轨道：22% 在浅色白底上跟卡片只有 1.5:1，边界几乎看不见；提到 32%
-     浅色约 3:1、深色约 3:1，两头都够。line-strong 留给不支持 color-mix 的浏览器 */
+  /* 轨道浓度按 WCAG 3:1 反推出来的：32% 在浅色卡片上只到 1.8:1，看不见边界。
+     45% 时浅色约 #8a8a8a、深色约 #818181，两头都是标准中灰，对比 3:1 达标，
+     又不会盖过纯白/纯黑的填充条。line-strong 留给不支持 color-mix 的浏览器 */
   .track {
     position: relative;
     height: clamp(6px, 3.4vh, 24px);
     background: var(--line-strong);
-    background: color-mix(in srgb, var(--ink) 32%, transparent);
+    background: color-mix(in srgb, var(--ink) 45%, transparent);
     border-radius: 999px;
     overflow: hidden;
     min-width: 0;
