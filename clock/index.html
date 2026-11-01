@@ -27,6 +27,7 @@
         <p class="display" id="time">--:--</p><span class="sec" id="sec">:--</span>
       </div>
       <span class="chip chip--strong" id="date">—</span>
+      <span class="chip" id="festival">—</span>
     </div>
   </div>
 
@@ -37,6 +38,34 @@
   var elTime = document.getElementById('time');
   var elSec  = document.getElementById('sec');
   var elDate = document.getElementById('date');
+  var elFest = document.getElementById('festival');
+
+  /* 只看这五个重要节日：公历三个、农历两个。
+     公历直接比月日；农历靠 toLunar 逐日往后试，最多扫 420 天。 */
+  var FEST = [
+    { type: 'solar', m: 10, d: 1,  name: '国庆'   },
+    { type: 'solar', m: 10, d: 31, name: '万圣节' },
+    { type: 'solar', m: 12, d: 25, name: '圣诞'   },
+    { type: 'lunar', m: 8,  d: 15, name: '中秋'   },
+    { type: 'lunar', m: 1,  d: 1,  name: '春节'   }
+  ];
+
+  function nextFestival(from) {
+    var y = from.getFullYear(), mo = from.getMonth(), da = from.getDate();
+    for (var i = 0; i <= 420; i++) {
+      var d = new Date(y, mo, da + i);
+      for (var k = 0; k < FEST.length; k++) {
+        var f = FEST[k];
+        if (f.type === 'solar') {
+          if (d.getMonth() + 1 === f.m && d.getDate() === f.d) return { name: f.name, days: i };
+        } else if (typeof toLunar === 'function') {
+          var l = toLunar(d);
+          if (!l.leap && l.m === f.m && l.d === f.d) return { name: f.name, days: i };
+        }
+      }
+    }
+    return null;
+  }
 
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
 
@@ -55,6 +84,16 @@
       try { lunar = (typeof lunarText === 'function') ? lunarText(d) : ''; } catch (e) {}
       elDate.textContent = d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate())
                          + ' ' + WEEK[d.getDay()] + (lunar ? '　' + lunar : '');
+
+      if (elFest) {
+        try {
+          var f = nextFestival(d);
+          elFest.textContent = !f ? ' '
+            : f.days === 0 ? '今天 · ' + f.name
+            : f.days === 1 ? '明天 · ' + f.name
+            : '距' + f.name + ' ' + f.days + ' 天';
+        } catch (e2) { elFest.textContent = ' '; }
+      }
     }
   }
 
