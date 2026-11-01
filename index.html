@@ -66,7 +66,7 @@
     </a>
     <a class="tile" href="weather/">
       <b>天气</b>
-      <span>大同 / 苏州可切换，Open-Meteo 数据</span>
+      <span>默认大同，加 ?city=sz 切苏州，Open-Meteo 数据</span>
     </a>
     <a class="tile" href="countdown/">
       <b>倒计时</b>
@@ -74,7 +74,11 @@
     </a>
     <a class="tile" href="quote/">
       <b>今日一句</b>
-      <span>本地句池，一天一句，稳定不重复</span>
+      <span>今日诗词接口，半小时一句，挂了落回本地句池</span>
+    </a>
+    <a class="tile" href="lifeline/">
+      <b>生命线 · lifeline</b>
+      <span>本日 / 本周 / 本月 / 本年 已过进度，四条一起看</span>
     </a>
   </div>
 
@@ -85,7 +89,7 @@
     倒计时可带参数：<code>countdown/?date=2027-06-07&amp;label=高考</code><br>
     天气切苏州：<code>weather/?city=sz</code><br>
     总览建议高度 460px 以上（宽 660 以上最好看）。<br>
-    所有组件都没有任何 API key，天气走 Open-Meteo 公开接口。
+    所有组件都不含任何密钥，天气走 Open-Meteo、诗句走今日诗词，两个都是公开免费接口。
   </div>
 </body>
 </html>

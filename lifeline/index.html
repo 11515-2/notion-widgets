@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>生命线 · lifeline</title>
+<link rel="stylesheet" href="../assets/base.css">
+<script>
+  (function () {
+    var q = new URLSearchParams(location.search);
+    var t = q.get('theme');
+    if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+    if (q.get('solid') === '1') document.documentElement.setAttribute('data-solid', '');
+  })();
+</script>
+<style>
+  /* 四行摞一起，行高跟容器走；太矮时 gap 先缩，字号靠 vmin 兜住 */
+  .card {
+    gap: clamp(6px, 2.6vh, 26px);
+    padding: clamp(10px, 3vh, 30px) clamp(12px, 3vw, 34px);
+  }
+
+  .lifeline {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: clamp(8px, 4.2vh, 40px);
+    width: 100%;
+    min-height: 0;
+  }
+
+  .line {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: clamp(8px, 2.2vw, 22px);
+    min-width: 0;
+  }
+
+  /* 行数固定四行，所以字号跟「高度」走，不跟 vmin —— 竖版容器会被宽度拖小。 */
+  .lbl {
+    font-size: clamp(11px, 4vh, 24px);
+    font-weight: var(--w-body);
+    color: var(--ink-3);
+    letter-spacing: .06em;
+    white-space: nowrap;
+    line-height: 1;
+  }
+
+  /* 轨道：用 line-strong 而不是 surface-2 —— 深色下 surface-2 太淡，
+     看不清「这条全长到哪儿」，比例感会丢 */
+  .track {
+    position: relative;
+    height: clamp(6px, 3vh, 22px);
+    background: var(--line-strong);
+    border-radius: 999px;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    min-width: 3px;          /* 0.7% 这种也要看得见，不能缩成一个点 */
+    background: var(--ink);
+    border-radius: 999px;
+    /* 秒级推进，线性过渡才不抖 */
+    transition: width .9s linear;
+  }
+
+  /* 数字是配角，条才是主体：字号收一档，条加粗一档 */
+  .pct {
+    font-size: clamp(14px, 6.6vh, 38px);
+    font-weight: var(--w-strong);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.01em;
+    line-height: 1;
+    color: var(--ink);
+    text-align: right;
+    min-width: 3.6em;      /* 100.0% 也要占同样宽，数字跳不抖 */
+  }
+
+  /* 极窄容器：标签和百分比挤一起，把条压到下一行 */
+  @media (max-width: 240px) {
+    .line {
+      grid-template-columns: auto auto;
+      grid-template-areas: "lbl pct" "bar bar";
+      row-gap: 4px;
+    }
+    .lbl   { grid-area: lbl; }
+    .pct   { grid-area: pct; }
+    .track { grid-area: bar; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fill { transition: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="lifeline" id="lifeline">
+      <div class="line"><span class="lbl">本日</span><span class="track"><i class="fill" id="f0"></i></span><span class="pct" id="p0">—</span></div>
+      <div class="line"><span class="lbl">本周</span><span class="track"><i class="fill" id="f1"></i></span><span class="pct" id="p1">—</span></div>
+      <div class="line"><span class="lbl">本月</span><span class="track"><i class="fill" id="f2"></i></span><span class="pct" id="p2">—</span></div>
+      <div class="line"><span class="lbl">本年</span><span class="track"><i class="fill" id="f3"></i></span><span class="pct" id="p3">—</span></div>
+    </div>
+  </div>
+
+<script>
+(function () {
+  var DAY = 86400000;
+
+  var fills = [
+    document.getElementById('f0'), document.getElementById('f1'),
+    document.getElementById('f2'), document.getElementById('f3')
+  ];
+  var pcts = [
+    document.getElementById('p0'), document.getElementById('p1'),
+    document.getElementById('p2'), document.getElementById('p3')
+  ];
+
+  /* 四个区间的起止点。全部用 Date 构造，让浏览器自己处理月长、闰年、
+     以及万一有夏令时的时长差 —— 不要自己拿毫秒数加减天数。 */
+  function spans(now) {
+    var y = now.getFullYear(), m = now.getMonth(), d = now.getDate();
+
+    // 本日：今天 00:00 → 明天 00:00
+    var dayStart = new Date(y, m, d);
+    var dayEnd   = new Date(y, m, d + 1);
+
+    // 本周：本周一 00:00 → 下周一 00:00（国内习惯周一开头，不是周日）
+    var dow = (dayStart.getDay() + 6) % 7;          // 周一=0 … 周日=6
+    var weekStart = new Date(y, m, d - dow);
+    var weekEnd   = new Date(y, m, d - dow + 7);
+
+    // 本月：1 号 00:00 → 下月 1 号 00:00
+    var monthStart = new Date(y, m, 1);
+    var monthEnd   = new Date(y, m + 1, 1);
+
+    // 本年：1/1 00:00 → 次年 1/1 00:00
+    var yearStart = new Date(y, 0, 1);
+    var yearEnd   = new Date(y + 1, 0, 1);
+
+    return [
+      [dayStart,   dayEnd],
+      [weekStart,  weekEnd],
+      [monthStart, monthEnd],
+      [yearStart,  yearEnd]
+    ];
+  }
+
+  function ratio(now, a, b) {
+    var total = b - a;
+    if (!(total > 0)) return 0;
+    var r = (now - a) / total;
+    return r < 0 ? 0 : r > 1 ? 1 : r;
+  }
+
+  function tick() {
+    var now = new Date();
+    var t = now.getTime();
+    var s = spans(now);
+
+    for (var i = 0; i < 4; i++) {
+      var r = ratio(t, s[i][0], s[i][1]);
+      var p = r * 100;
+      fills[i].style.width = p.toFixed(2) + '%';
+      // 还没走满时显示一位小数，走满就是 100%
+      pcts[i].textContent = (p >= 99.995 ? '100' : p.toFixed(1)) + '%';
+    }
+  }
+
+  tick();
+  // 本日那一行要秒级推进，所以 1 秒一次；其余三行跟着算，成本可以忽略
+  setInterval(tick, 1000);
+})();
+</script>
+</body>
+</html>
