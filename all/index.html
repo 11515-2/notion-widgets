@@ -139,6 +139,8 @@
   .blk.blk--life {
     justify-content: space-evenly;
     padding-block: 0;
+    /* 左右留白比别的块大一点：标签原来离块的左边缘只有 5px，贴着边不动看 */
+    padding-inline: clamp(9px, 3vmin, 26px);
     gap: 0;
     flex: 1 1 auto;      /* 竖排档也要分到高度，不然四行刚好撑满、一点间隙都没有 */
   }
@@ -202,7 +204,7 @@
   @media (min-aspect-ratio: 3/2) and (max-aspect-ratio: 22/10) {
     .stage {
       display: grid;
-      grid-template-columns: 1.75fr 1fr 1fr;
+      grid-template-columns: 1.55fr 1fr 1.15fr;
       grid-template-rows: 1fr 1fr auto;
       grid-template-areas:
         "time  wx     life"
@@ -238,11 +240,11 @@
       gap: clamp(0px, .3vmin, 2px);
     }
 
-    /* 时间块是主角。三列后它占 1.75 份，710×393 时约 313 宽、内宽 297，
-       8 个字符（13:38 + :11）按等宽 0.617em 算，字号上限 ≈ 297/4.94 ≈ 60px，
-       取 13vmin/8vw 刚好卡在里面，比温度天数拉开一档。 */
-    #time { font-size: clamp(15px, min(13vmin, 8vw), 78px); }
-    #sec  { font-size: clamp(9px,  min(6.5vmin, 4vw), 39px); }
+    /* 时间块是主角，但要把宽度让一点给生命线：1.75fr 收到 1.55fr，
+       710×393 时约 281 宽、内宽 265，8 个字符按等宽 0.617em 算，
+       字号上限 ≈ 265/4.94 ≈ 53px，取 12vmin/7.4vw 卡在里面。 */
+    #time { font-size: clamp(15px, min(12vmin, 7.4vw), 72px); }
+    #sec  { font-size: clamp(9px,  min(6vmin, 3.7vw), 36px); }
     #temp { font-size: clamp(12px, min(9vmin, 6vw), 62px); }
     #days { font-size: clamp(13px, min(9.5vmin, 6.4vw), 66px); }
     .unit, .deg { font-size: clamp(8px, min(4vmin, 2.8vw), 22px); }
