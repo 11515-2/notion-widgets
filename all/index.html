@@ -45,29 +45,49 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: clamp(10px, 2.6vh, 24px);
+    gap: clamp(6px, 1.6vh, 13px);
     text-align: left;
   }
 
-  /* 顶对齐靠 baseline：两列第一个元素（两个大数字）落在同一条线上 */
-  .pair {
-    display: flex;
-    align-items: baseline;
-    gap: clamp(12px, 3.4vw, 24px);
-    width: 100%;
-  }
-
-  .col {
+  /* 每一块都自带底色和圆角 —— 有块面才立得住，文字光浮着会散 */
+  .blk {
+    background: var(--surface);
+    border-radius: var(--r-md);
+    padding: clamp(8px, 2vh, 16px) clamp(9px, 2vw, 14px);
     display: flex;
     flex-direction: column;
-    gap: clamp(3px, .9vh, 8px);
+    gap: clamp(2px, .55vh, 5px);
     min-width: 0;
   }
-  .col--l { flex: 0 0 auto; }
-  .col--r { flex: 1 1 auto; }
 
-  /* 列里的大数字之后留一点呼吸，别让小字贴太紧 */
-  .col .num { margin-bottom: clamp(1px, .3vh, 3px); }
+  /* 上半一对：时间块按内容定宽，天气块吃掉剩下的 */
+  .pair {
+    display: flex;
+    align-items: stretch;
+    gap: clamp(6px, 1.6vw, 10px);
+    width: 100%;
+  }
+  .blk--time { flex: 0 0 auto; justify-content: center; }
+  .blk--wx   { flex: 1 1 auto; }
+
+  /* 倒计时块：天数靠左、目标与剩余靠右 —— 左右两端各贴一边 */
+  .blk--count {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: clamp(8px, 2.4vw, 16px);
+  }
+  .count-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: clamp(1px, .4vh, 3px);
+    text-align: right;
+    min-width: 0;
+  }
+
+  /* 块里的大数字之后留一点呼吸，别让小字贴太紧 */
+  .blk .num { margin-bottom: clamp(1px, .3vh, 3px); }
 
   /* ─── 字级 ─────────────────────────────────────────── */
   .num {
@@ -133,17 +153,16 @@
   <div class="card">
     <div class="stage">
 
+      <!-- 上半：时间块 + 天气块，两块并排 -->
       <div class="pair">
 
-        <!-- 左列：时间 → 日期 → 农历（3 行） -->
-        <div class="col col--l">
+        <div class="blk blk--time">
           <div class="num"><span id="time">--:--</span><span id="sec">:--</span></div>
           <span id="date" class="sub sub--main">—</span>
           <span id="lunar" class="sub">—</span>
         </div>
 
-        <!-- 右列：温度 → 状况 → 高低 → 体感湿度（4 行，跟左列错开） -->
-        <div class="col col--r">
+        <div class="blk blk--wx">
           <div class="num"><span id="temp">—</span><span class="deg">°C</span></div>
           <span id="desc" class="sub sub--main">正在读取…</span>
           <span class="sub">最高<b id="hi">—</b>　最低<b id="lo">—</b></span>
@@ -152,19 +171,17 @@
 
       </div>
 
-      <!-- 倒计时整组独占一行：天数在左、目标与剩余在右，别拆到两列去 -->
-      <div class="pair">
-        <div class="col col--l">
-          <div class="num"><span id="days">—</span><span class="unit">天</span></div>
-        </div>
-        <div class="col col--r">
+      <!-- 中段：倒计时整块，天数在左、目标和剩余在右 -->
+      <div class="blk blk--count">
+        <div class="num"><span id="days">—</span><span class="unit">天</span></div>
+        <div class="count-right">
           <span class="sub sub--main"><span id="label">—</span> · <span id="target">—</span></span>
           <span id="detail" class="sub">—</span>
         </div>
       </div>
 
-      <!-- 引文：跨满两列 -->
-      <div class="quote">
+      <!-- 底部：今日一句，整块通栏 -->
+      <div class="blk">
         <p id="text">—</p>
         <div class="by-row">
           <span id="by" class="sub">—</span>
