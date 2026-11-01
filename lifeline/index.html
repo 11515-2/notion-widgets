@@ -15,18 +15,27 @@
 </script>
 <style>
   /* 四行摞一起，行高跟容器走；太矮时 gap 先缩，字号靠 vmin 兜住 */
+  /* 外层只留一点点，背景块交给 .lifeline 自己做，跟其他组件的 .block 一个路数 */
   .card {
     gap: clamp(6px, 2.6vh, 26px);
-    padding: clamp(10px, 3vh, 30px) clamp(12px, 3vw, 34px);
+    padding: clamp(8px, 2vh, 16px);
   }
 
+  /* 一整块底色包住四行 —— 不拆成四个横条（星明确否过「四条条形板块」）。
+     flex:1 让它撑满容器高度，否则竖版 560 高里块只有 400 见方，四周黑场太空。 */
+  /* 一整块底色包住四行 —— 不拆成四个横条（星明确否过「四条条形板块」）。
+     不要 flex:1 撑满：撑满 560 高后四行只占三分之一，上下死白更多，
+     视觉反而比「块随内容长」更空。让块按内容撑开、整体居中最好看。 */
   .lifeline {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: clamp(8px, 4.2vh, 40px);
+    gap: clamp(8px, 7vh, 48px);
     width: 100%;
     min-height: 0;
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    padding: clamp(14px, 6.5vh, 60px) clamp(16px, 4.4vw, 52px);
   }
 
   .line {
@@ -37,22 +46,25 @@
     min-width: 0;
   }
 
-  /* 行数固定四行，所以字号跟「高度」走，不跟 vmin —— 竖版容器会被宽度拖小。 */
+  /* 行数固定四行，所以字号跟「高度」走，不跟 vmin —— 竖版容器会被宽度拖小。
+     5vh：560 高约 28px、393 高约 20px、320 高约 16px（320 那档别再小了）。
+     颜色用 ink-2 不用 ink-3：ink-3 在浅色白底上只有 2.5:1，标签会糊掉。 */
   .lbl {
-    font-size: clamp(11px, 4vh, 24px);
+    font-size: clamp(11px, 5vh, 28px);
     font-weight: var(--w-body);
-    color: var(--ink-3);
+    color: var(--ink-2);
     letter-spacing: .06em;
     white-space: nowrap;
     line-height: 1;
   }
 
-  /* 轨道：用 line-strong 而不是 surface-2 —— 深色下 surface-2 太淡，
-     看不清「这条全长到哪儿」，比例感会丢 */
+  /* 轨道：22% 在浅色白底上跟卡片只有 1.5:1，边界几乎看不见；提到 32%
+     浅色约 3:1、深色约 3:1，两头都够。line-strong 留给不支持 color-mix 的浏览器 */
   .track {
     position: relative;
-    height: clamp(6px, 3vh, 22px);
+    height: clamp(6px, 3.4vh, 24px);
     background: var(--line-strong);
+    background: color-mix(in srgb, var(--ink) 32%, transparent);
     border-radius: 999px;
     overflow: hidden;
     min-width: 0;
@@ -73,7 +85,7 @@
 
   /* 数字是配角，条才是主体：字号收一档，条加粗一档 */
   .pct {
-    font-size: clamp(14px, 6.6vh, 38px);
+    font-size: clamp(14px, 9vh, 52px);
     font-weight: var(--w-strong);
     font-variant-numeric: tabular-nums;
     letter-spacing: -.01em;
