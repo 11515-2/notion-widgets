@@ -130,8 +130,18 @@
     line-height: 1;
   }
 
-  /* 四行均匀排开：块有多高就把四行分多开，别挤在中间留一大片空 */
-  .blk--life { justify-content: space-between; }
+  /* 四行均匀排开：块有多高就把四行分多开。
+     用 space-evenly 不用 space-between —— between 把首尾两行顶到块的上下边缘
+     （星说「本日本年太边缘」）。
+     padding-block 和 gap 都归零，间隙全交给 space-evenly 算。
+     选择器写成 .blk.blk--life 是必须的：扁排档里有 `.blk { padding: … }`，
+     单类选择器同优先级、后出现会把它覆盖回去，首尾就会比中间多出一截。 */
+  .blk.blk--life {
+    justify-content: space-evenly;
+    padding-block: 0;
+    gap: 0;
+    flex: 1 1 auto;      /* 竖排档也要分到高度，不然四行刚好撑满、一点间隙都没有 */
+  }
 
   /* ─── 字级：主数字一套，其余全挂 .sub ──────────────────── */
   .num {
@@ -205,7 +215,7 @@
     .blk--time  { grid-area: time; }
     .blk--wx    { grid-area: wx; }
     .blk--count { grid-area: count; }
-    .blk--life  { grid-area: life; gap: clamp(2px, 1.1vmin, 9px); }
+    .blk--life  { grid-area: life; }
     .blk--quote { grid-area: quote; }
 
     /* 中列只剩 159~204 宽，「高考 · 2027.06.07」这 15 个字放不下，
@@ -254,7 +264,7 @@
     .blk--time  { flex: 2.2 1 0; }
     .blk--wx    { flex: 1.25 1 0; }
     .blk--count { flex: 1.7 1 0; flex-direction: column; align-items: flex-start; justify-content: center; }
-    .blk--life  { flex: 1.45 1 0; gap: clamp(1px, .8vmin, 6px); }
+    .blk--life  { flex: 1.45 1 0; }
     .blk--quote { flex: 1.9 1 0; }
 
     .count-right { align-items: flex-start; text-align: left; }
