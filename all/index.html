@@ -127,9 +127,36 @@
   }
   #by { color: var(--ink-2); }
 
+  /* ─── 横向偏方（6:5 ~ 22:10）：2×2 四格均分 ─────────────
+     Notion 里拖到 710×393 这种比例就是这一档。用竖版那套会让
+     时间块被压成一根窄柱、天气块右边空出一大片；四格均分才站得住。 */
+  @media (min-aspect-ratio: 6/5) and (max-aspect-ratio: 22/10) {
+    .stage {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: clamp(4px, 1.4vmin, 14px);
+    }
+    .pair { display: contents; }
+
+    .blk--count {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* 网格里四格一般大，字号统一挂 vmin —— 跟着格子尺寸走 */
+    #time { font-size: clamp(16px, min(15vmin, 12vw), 110px); }
+    #sec  { font-size: clamp(10px, min(7.5vmin, 6vw), 55px); }
+    #temp { font-size: clamp(13px, min(12vmin, 9.5vw), 80px); }
+    #days { font-size: clamp(15px, min(13vmin, 10.5vw), 90px); }
+    .unit, .deg { font-size: clamp(8px, min(4.6vmin, 3.8vw), 26px); }
+    .sub  { font-size: clamp(7px, min(3.3vmin, 2.6vw), 16px); }
+    #text { font-size: clamp(9px, min(4.6vmin, 3.6vw), 30px); }
+  }
+
   /* ─── 扁容器：四块横排一行，各自按比例分宽度 ─────────────
-     Notion 的 embed 默认就是这种扁框（320x110 这种），
-     竖着摞四块会把每块压成一条缝，所以横过来排。 */
+     Notion 的 embed 拖成很扁的时候（宽高比 2.5 以上）。 */
   @media (min-aspect-ratio: 5/2) {
     .stage {
       flex-direction: row;
