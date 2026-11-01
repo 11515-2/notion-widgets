@@ -1,0 +1,36 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:0}iframe{display:block;border:0;margin-bottom:4px}</style></head><body>
+<iframe id="a" src="./all/?theme=dark" style="width:320px;height:110px"></iframe>
+<iframe id="b" src="./all/?theme=dark" style="width:600px;height:300px"></iframe>
+<iframe id="c" src="./all/?theme=dark" style="width:400px;height:560px"></iframe>
+<pre id="out">pending</pre>
+<script>
+window.addEventListener('load', function () {
+  setTimeout(function () {
+    var L = [];
+    function probe(id, tag) {
+      var fr = document.getElementById(id);
+      var d = fr.contentDocument, w = fr.contentWindow;
+      var card = d.querySelector('.card').getBoundingClientRect();
+      var st = d.querySelector('.stage').getBoundingClientRect();
+      var blks = d.querySelectorAll('.blk');
+      var over = 0, wh = [];
+      for (var i = 0; i < blks.length; i++) {
+        var b = blks[i];
+        if (b.scrollWidth > b.clientWidth + 1 || b.scrollHeight > b.clientHeight + 1) over++;
+        wh.push(Math.round(b.getBoundingClientRect().width) + 'x' + Math.round(b.getBoundingClientRect().height));
+      }
+      var sz = function (s) { var e = d.querySelector(s); return e ? parseFloat(getComputedStyle(e).fontSize).toFixed(1) : 'NA'; };
+      L.push(tag + ' viewport=' + w.innerWidth + 'x' + w.innerHeight
+        + '  stage铺满=' + (Math.round(st.width) >= Math.round(card.width) - 1 ? '是' : '否(' + Math.round(st.width) + '/' + Math.round(card.width) + ')'));
+      L.push('  块: ' + wh.join('  '));
+      L.push('  溢出的块数: ' + over);
+      L.push('  字号 时间=' + sz('#time') + ' 温度=' + sz('#temp') + ' 天数=' + sz('#days')
+        + ' 引文=' + sz('#text') + ' 小字=' + sz('.sub'));
+    }
+    probe('a', '[320x110 扁]');
+    probe('b', '[600x300 扁]');
+    probe('c', '[400x560 竖]');
+    document.getElementById('out').textContent = L.join('\n');
+  }, 3200);
+});
+</script></body></html>

@@ -14,104 +14,95 @@
   })();
 </script>
 <style>
-  /* ═══ 交叉版 · 两列错行 ══════════════════════════════════════════════
-     两侧各自成列、各自往下堆，两列的顶对齐、底错开：
+  /* ═══ 铺满版 · 四块吃满容器 ══════════════════════════════════════════
+     之前 .stage 上挂了个 max-width: 400px —— 容器再宽内容也只长到 400，
+     在 Notion 里就等于两头留白、字看着更小。现在全去掉，四个块直接吃满。
 
-        23:16 :16        1°C
-        2026.10.31 周六   晴 · 大同
-        九月廿二          最高9°  最低0°
-                         体感-4°  湿度60%
-        218 天            高考 · 2027.06.07
-                         余 0 时 43 分 43 秒
-        ──────────────────────────────────
-        「一个人知道自己为什么而活，
-          就可以忍受任何一种生活。」
-                                 尼采 2026.10.31
+     两种形态按容器宽高比自动切：
+       宽高比 < 5:2（竖的、方的）  → 上两块并排 + 下两块通栏
+       宽高比 ≥ 5:2（扁的）        → 四块横排一行
 
-     上一版用 space-between 把右边元素硬撑到两行里，结果元素被拉散、
-     跟左边的基线全对不上，看着像错位。这版改成：
-       · 两列都用 align-items: baseline 顶对齐 —— 时间和温度两个大数字
-         落在同一条基线上，这才像"设计"而不是"歪了"
-       · 列内间距统一，不再把人拉开
-       · 左列 4 行、右列 6 行 —— 两列底部自然错开，交错感来自这里 */
+     字号统一用 min(vh, vw) 双约束 + vmin 兜底，容器放大字就跟着放大，
+    容器再小也压不散。 */
 
-  .card { padding: clamp(12px, 2.4vh, 22px) clamp(14px, 3.4vw, 28px); }
+  .card { padding: clamp(6px, 1.8vmin, 18px); }
 
   .stage {
-    height: 100%;
     width: 100%;
-    max-width: min(100%, 400px);
-    margin: 0 auto;
+    height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: clamp(6px, 1.6vh, 13px);
+    gap: clamp(4px, 1.4vmin, 12px);
     text-align: left;
   }
 
-  /* 每一块都自带底色和圆角 —— 有块面才立得住，文字光浮着会散 */
   .blk {
     background: var(--surface);
     border-radius: var(--r-md);
-    padding: clamp(8px, 2vh, 16px) clamp(9px, 2vw, 14px);
+    padding: clamp(5px, 1.9vmin, 16px) clamp(6px, 2vmin, 15px);
     display: flex;
     flex-direction: column;
-    gap: clamp(2px, .55vh, 5px);
+    justify-content: center;
+    gap: clamp(1px, .55vmin, 5px);
     min-width: 0;
+    min-height: 0;
+    overflow: hidden;
   }
 
-  /* 上半一对：时间块按内容定宽，天气块吃掉剩下的 */
   .pair {
     display: flex;
     align-items: stretch;
-    gap: clamp(6px, 1.6vw, 10px);
+    gap: clamp(4px, 1.4vmin, 10px);
     width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
   }
-  .blk--time { flex: 0 0 auto; justify-content: center; }
+  .blk--time { flex: 0 0 auto; }
   .blk--wx   { flex: 1 1 auto; }
 
-  /* 倒计时块：天数靠左、目标与剩余靠右 —— 左右两端各贴一边 */
   .blk--count {
+    flex: 0 0 auto;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    gap: clamp(8px, 2.4vw, 16px);
+    gap: clamp(6px, 2vmin, 16px);
   }
   .count-right {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: clamp(1px, .4vh, 3px);
+    justify-content: center;
+    gap: clamp(0px, .35vmin, 3px);
     text-align: right;
     min-width: 0;
   }
 
-  /* 块里的大数字之后留一点呼吸，别让小字贴太紧 */
-  .blk .num { margin-bottom: clamp(1px, .3vh, 3px); }
-
-  /* ─── 字级 ─────────────────────────────────────────── */
+  /* ─── 字级：主数字一套，其余全挂 .sub ──────────────────── */
   .num {
     display: flex;
     align-items: baseline;
-    gap: clamp(2px, .7vw, 6px);
+    gap: clamp(1px, .6vmin, 6px);
     line-height: .92;
     color: var(--ink);
     font-weight: var(--w-strong);
     letter-spacing: -.03em;
   }
-  #time { font-size: clamp(26px, min(9.3vh, 13vw), 100px); }
-  #sec  { font-size: clamp(13px, min(4.65vh, 6.5vw), 50px); color: var(--ink-3); }
-  #temp { font-size: clamp(16px, min(6.2vh, 8.6vw), 66px); }
-  #days { font-size: clamp(20px, min(7vh, 9.8vw), 76px); }
+
+  /* 三个主数字：跟容器同步放大，上限放到 130 不封顶得太早 */
+  #time { font-size: clamp(16px, min(10.2vh, 14vw), 120px); }
+  #sec  { font-size: clamp(10px, min(5.1vh, 7vw), 60px); color: var(--ink-3); }
+  #temp { font-size: clamp(13px, min(7.2vh, 10vw), 84px); }
+  #days { font-size: clamp(15px, min(8.2vh, 11.5vw), 96px); }
 
   .unit, .deg {
-    font-size: clamp(9px, min(2.8vh, 3.6vw), 24px);
+    font-size: clamp(8px, min(3.4vh, 4.2vw), 30px);
     color: var(--ink-3);
     letter-spacing: .06em;
   }
 
   .sub {
-    font-size: clamp(9px, min(2.3vh, 2.9vw), 13px);
+    font-size: clamp(7px, min(2.7vh, 3.3vw), 18px);
     color: var(--ink-3);
     letter-spacing: .02em;
     white-space: nowrap;
@@ -119,15 +110,10 @@
   .sub b { color: var(--ink-2); font-weight: var(--w-body); }
   .sub--main { color: var(--ink-2); }
 
-  /* ─── 引文：跨满两列，收在底部 ───────────────────────── */
-  .quote {
-    border-top: 1px solid var(--line);
-    padding-top: clamp(8px, 2vh, 18px);
-  }
   #text {
     margin: 0;
-    font-size: clamp(11px, min(3.3vh, 4.1vw), 24px);
-    line-height: 1.55;
+    font-size: clamp(9px, min(3.9vh, 4.8vw), 34px);
+    line-height: 1.5;
     font-weight: var(--w-strong);
     color: var(--ink);
     min-width: 0;
@@ -136,16 +122,45 @@
   .by-row {
     display: flex;
     align-items: baseline;
-    gap: clamp(4px, 1vw, 9px);
-    margin-top: clamp(3px, .9vh, 8px);
+    gap: clamp(3px, 1vmin, 10px);
+    margin-top: clamp(1px, .7vmin, 7px);
   }
   #by { color: var(--ink-2); }
 
-  /* 极窄时只压字号，两列不动 */
-  @media (max-width: 300px) {
-    #time { font-size: clamp(20px, 12vw, 62px); }
-    #temp { font-size: clamp(14px, 8vw, 48px); }
-    #days { font-size: clamp(18px, 9vw, 52px); }
+  /* ─── 扁容器：四块横排一行，各自按比例分宽度 ─────────────
+     Notion 的 embed 默认就是这种扁框（320x110 这种），
+     竖着摞四块会把每块压成一条缝，所以横过来排。 */
+  @media (min-aspect-ratio: 5/2) {
+    .stage {
+      flex-direction: row;
+      align-items: stretch;
+      gap: clamp(4px, 1vmin, 10px);
+    }
+    .pair { display: contents; }        /* 拆掉包裹层，四块直接并排 */
+
+    .blk--time  { flex: 2.2 1 0; }
+    .blk--wx    { flex: 1.25 1 0; }
+    .blk--count { flex: 1.7 1 0; flex-direction: column; align-items: flex-start; justify-content: center; }
+    .blk--quote { flex: 1.9 1 0; }
+
+    .count-right { align-items: flex-start; text-align: left; }
+
+    /* 扁框里高度就是瓶颈，全部按 vh 定，把纵向空间吃满 */
+    #time { font-size: clamp(13px, 15.5vh, 72px); }
+    #sec  { font-size: clamp(9px, 8.5vh, 34px); }
+    #temp { font-size: clamp(11px, 12vh, 50px); }
+    #days { font-size: clamp(12px, 13.5vh, 56px); }
+    .unit, .deg { font-size: clamp(7px, 6vh, 22px); }
+    .sub  { font-size: clamp(6px, 5vh, 13px); }
+    #text { font-size: clamp(7px, 5.4vh, 15px); line-height: 1.35; }
+    .blk  { padding: clamp(4px, 4.5vh, 14px) clamp(5px, 1.6vmin, 14px); }
+  }
+
+  /* 极窄竖屏：只压字号，结构不动 */
+  @media (max-width: 280px) {
+    #time { font-size: clamp(14px, 11vw, 60px); }
+    #temp { font-size: clamp(12px, 8vw, 40px); }
+    #days { font-size: clamp(13px, 9vw, 46px); }
   }
 </style>
 </head>
@@ -153,7 +168,7 @@
   <div class="card">
     <div class="stage">
 
-      <!-- 上半：时间块 + 天气块，两块并排 -->
+      <!-- 上半：时间块 + 天气块 -->
       <div class="pair">
 
         <div class="blk blk--time">
@@ -171,7 +186,7 @@
 
       </div>
 
-      <!-- 中段：倒计时整块，天数在左、目标和剩余在右 -->
+      <!-- 中段：倒计时 -->
       <div class="blk blk--count">
         <div class="num"><span id="days">—</span><span class="unit">天</span></div>
         <div class="count-right">
@@ -180,8 +195,8 @@
         </div>
       </div>
 
-      <!-- 底部：今日一句，整块通栏 -->
-      <div class="blk">
+      <!-- 底部：今日一句 -->
+      <div class="blk blk--quote">
         <p id="text">—</p>
         <div class="by-row">
           <span id="by" class="sub">—</span>
@@ -208,7 +223,6 @@
     elTime.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes());
     elSec.textContent  = ':' + pad(d.getSeconds());
 
-    // 公历一行、农历一行
     var key = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
     if (key !== lunarKey) {
       lunarKey = key;
@@ -343,7 +357,6 @@
     var s  = Math.floor(abs % 6e4 / 1e3);
 
     elDays.textContent = past ? '−' + d : d;
-    // 小时为 0 就别写“0 时”，免得看着像只剩 42 分钟
     var tail = (h > 0 ? h + ' 时 ' : '') + pad(mi) + ' 分 ' + pad(s) + ' 秒';
     elDetail.textContent = (past ? '超 ' : '余 ') + tail;
   }
