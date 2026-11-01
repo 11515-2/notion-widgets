@@ -126,7 +126,11 @@
     letter-spacing: -.01em;
     color: var(--ink);
     text-align: right;
-    min-width: 3.4em;         /* 100.0% 也要占同样宽，数字不抖 */
+    /* 3.4em 是照着「100.0%」留的余量，但实际最长也就「58.9%」5 个字符≈2.6em，
+       元素比文字宽出 4.6px，而 text-align:right 把文字顶到右边 —— 于是
+       「条→百分比」的间距比「标签→条」多了 4.6px，看着左右留白不匀。
+       收到 2.7em：刚好盖住最长文本，不同数值跳动时宽度仍然稳定。 */
+    min-width: 2.7em;
     line-height: 1;
   }
 
