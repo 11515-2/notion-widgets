@@ -246,7 +246,6 @@
         <p id="text">—</p>
         <div class="by-row">
           <span id="by" class="sub">—</span>
-          <span id="qdate" class="sub">—</span>
         </div>
       </div>
 
@@ -505,22 +504,36 @@
     ['读书是替自己找一些能一起说话的人。', '—']
   ];
 
-  function pad(n) { return n < 10 ? '0' + n : '' + n; }
-  var now = new Date();
-  var key = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
+  /* 每半小时换一句：把时间切成 30 分钟一格，用格号做哈希。
+     同一格内所有人看到同一句（不会乱跳），跨格才换。
+     每 15 秒对一次表，换格时立刻刷新，不靠 setInterval(30min) 慢慢漂。 */
+  var SLOT_MS = 30 * 60 * 1000;
 
-  var h = key;
-  h = (h ^ 61) ^ (h >>> 16);
-  h = h + (h << 3);
-  h = h ^ (h >>> 4);
-  h = h * 0x27d4eb2d;
-  h = h ^ (h >>> 15);
+  function slotHash(slot) {
+    var h = slot;
+    h = (h ^ 61) ^ (h >>> 16);
+    h = h + (h << 3);
+    h = h ^ (h >>> 4);
+    h = h * 0x27d4eb2d;
+    h = h ^ (h >>> 15);
+    return Math.abs(h) % POOL.length;
+  }
 
-  var item = POOL[Math.abs(h) % POOL.length];
-  document.getElementById('text').textContent = item[0];
-  document.getElementById('by').textContent = item[1];
-  document.getElementById('qdate').textContent =
-    now.getFullYear() + '.' + pad(now.getMonth() + 1) + '.' + pad(now.getDate());
+  var elText = document.getElementById('text');
+  var elBy   = document.getElementById('by');
+  var curSlot = -1;
+
+  function render() {
+    var slot = Math.floor(Date.now() / SLOT_MS);
+    if (slot === curSlot) return;
+    curSlot = slot;
+    var item = POOL[slotHash(slot)];
+    elText.textContent = item[0];
+    elBy.textContent = item[1];
+  }
+
+  render();
+  setInterval(render, 15000);
 })();
 </script>
 </body>
